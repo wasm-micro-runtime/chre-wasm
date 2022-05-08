@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2017 The Android Open Source Project
+ * Copyright (C) 2022 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,16 +14,30 @@
  * limitations under the License.
  */
 
-#include "chre/platform/power_control_manager.h"
+#ifndef CHRE_PLATFORM_ZEPHYR_MUTEX_BASE_IMPL_H_
+#define CHRE_PLATFORM_ZEPHYR_MUTEX_BASE_IMPL_H_
+
+#include "chre/platform/mutex.h"
 
 namespace chre {
 
-void PowerControlManager::preEventLoopProcess(size_t /* numPendingEvents */) {}
+inline Mutex::Mutex() {
+  k_mutex_init(&mutex);
+}
 
-void PowerControlManager::postEventLoopProcess(size_t /* numPendingEvents */) {}
+inline Mutex::~Mutex() {}
 
-bool PowerControlManager::hostIsAwake() {
-  return true;
+inline void Mutex::lock() {
+  k_mutex_lock(&mutex, K_FOREVER);
+}
+
+inline bool Mutex::try_lock() {
+  return (k_mutex_lock(&mutex, K_NO_WAIT) == 0);
+}
+
+inline void Mutex::unlock() {
+  k_mutex_unlock(&mutex);
 }
 
 }  // namespace chre
+#endif  // CHRE_PLATFORM_ZEPHYR_MUTEX_BASE_IMPL_H_

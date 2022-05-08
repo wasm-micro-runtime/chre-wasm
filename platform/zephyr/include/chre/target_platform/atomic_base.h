@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2017 The Android Open Source Project
+ * Copyright (C) 2022 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,16 +14,21 @@
  * limitations under the License.
  */
 
-#include "chre/platform/power_control_manager.h"
+#ifndef CHRE_PLATFORM_ZEPHYR_ATOMIC_BASE_H_
+#define CHRE_PLATFORM_ZEPHYR_ATOMIC_BASE_H_
+
+#include <sys/atomic.h>
 
 namespace chre {
 
-void PowerControlManager::preEventLoopProcess(size_t /* numPendingEvents */) {}
+class AtomicBase {
+ protected:
+  atomic_t value;
+};
 
-void PowerControlManager::postEventLoopProcess(size_t /* numPendingEvents */) {}
-
-bool PowerControlManager::hostIsAwake() {
-  return true;
-}
+typedef AtomicBase AtomicBoolBase;
+typedef AtomicBase AtomicUint32Base;
 
 }  // namespace chre
+
+#endif  // CHRE_PLATFORM_ZEPHYR_ATOMIC_BASE_H_

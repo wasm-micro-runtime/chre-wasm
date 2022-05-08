@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2017 The Android Open Source Project
+ * Copyright (C) 2022 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,17 +13,22 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#include <kernel.h>
+#include <cstdlib>
 
-#include "chre/platform/power_control_manager.h"
+#include "chre/platform/memory.h"
+#include "chre/platform/shared/pal_system_api.h"
+
+K_HEAP_DEFINE(chre_mem, CONFIG_CHRE_DYNAMIC_MEMORY_SIZE);
 
 namespace chre {
 
-void PowerControlManager::preEventLoopProcess(size_t /* numPendingEvents */) {}
+void *memoryAlloc(size_t size) {
+  return k_heap_alloc(&chre_mem, size, K_NO_WAIT);
+}
 
-void PowerControlManager::postEventLoopProcess(size_t /* numPendingEvents */) {}
-
-bool PowerControlManager::hostIsAwake() {
-  return true;
+void memoryFree(void *pointer) {
+  k_heap_free(&chre_mem, pointer);
 }
 
 }  // namespace chre
