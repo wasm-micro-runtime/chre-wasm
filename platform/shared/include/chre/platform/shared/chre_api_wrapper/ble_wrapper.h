@@ -40,7 +40,8 @@ typedef struct chreBleScanFilterWrapper {
   //!   const struct chreBleGenericFilter *scanFilters;
   uint32_t scanFiltersPointer;
 }chreBleScanFilterWrapper;
-static_assert(sizeof(chreBleScanFilterWrapper) == 8 &&
+
+static_assert(sizeof(chreBleScanFilterWrapper) == 8
               && offsetof(chreBleScanFilterWrapper, rssiThreshold) == 0
               && offsetof(chreBleScanFilterWrapper, scanFilterCount) == 1
               && offsetof(chreBleScanFilterWrapper, scanFiltersPointer) == 4);

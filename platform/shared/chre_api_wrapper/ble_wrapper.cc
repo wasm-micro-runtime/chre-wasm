@@ -28,14 +28,14 @@ uint32_t chreBleAdvertisementEventWrapperCopiedFromNative(wasm_module_inst_t Was
     //apply memory for the first level
     if(!(structDataOffset = wasm_runtime_module_malloc(WasmModuleInst,
                                                        sizeof(chreBleAdvertisementEventWrapper),
-                                                       static_cast<void**>(&structData)))) {
+                                                       reinterpret_cast<void**>(&structData)))) {
         goto fail1;
     }
     //! caculate the second level size
     reportsSize = eventData->numReports * sizeof(chreBleAdvertisingReportWrapper);
     //! apply memory for the second level
     if(!(reportsOffset = wasm_runtime_module_malloc(WasmModuleInst, reportsSize,
-                                                    static_cast<void**>(reports)))) {
+                                                    reinterpret_cast<void**>(reports)))) {
         goto fail2;
     }
     //! copy the first level
@@ -45,13 +45,13 @@ uint32_t chreBleAdvertisementEventWrapperCopiedFromNative(wasm_module_inst_t Was
     }
     structData->reportsPointer = reportsOffset;
     //!  and copy the second level
-    reportOfEventData = eventData->reports;
+    reportOfEventData = const_cast<chreBleAdvertisingReport *>(eventData->reports);
     for (int i = 0;i < eventData->numReports; ++i) {
         //! caculate the third level size
         dataOfReportsSize = reportOfEventData[i].dataLength;
         //！ apply memory for the third level
         if(!(dataOfReportsOffset = wasm_runtime_module_malloc(WasmModuleInst, dataOfReportsSize,
-                                                          static_cast<void**>(dataOfReports)))) {
+                                                          reinterpret_cast<void**>(&dataOfReports)))) {
             goto fail3;
         }
         //! copy the second level
@@ -85,7 +85,7 @@ chreBleAdvertisementEvent *chreBleAdvertisementEventCopiedFromWASM(wasm_module_i
 
     chreBleAdvertisementEventWrapper *structData = NULL;
     chreBleAdvertisingReportWrapper *reports = NULL;
-
+    uint8_t* data = NULL;
     uint32_t reportsOfeventDataSize = 0;
     uint32_t dataOfReportSize = 0;
 
@@ -97,7 +97,7 @@ chreBleAdvertisementEvent *chreBleAdvertisementEventCopiedFromWASM(wasm_module_i
         success = false;
         goto fail1;
     }
-    if (!(structData = static_cast<chreBleAdvertisingReport *>(
+    if (!(reports = static_cast<chreBleAdvertisingReportWrapper *>(
                             wasm_runtime_addr_app_to_native(WasmModuleInst,
                             structData->reportsPointer)))) {
         LOGE("Try to copy memory not belonging to the current Wasm module!");
@@ -126,17 +126,24 @@ chreBleAdvertisementEvent *chreBleAdvertisementEventCopiedFromWASM(wasm_module_i
     }
     // copy the second level
     for (int i = 0;i < structData->numReports; ++i) {
+        memcpy(&reportsOfeventData[i], &reports[i],
+               offsetof(chreBleAdvertisingReportWrapper, dataPointer));
+        reportsOfeventData[i].reserved = reports[i].reserved;
+
         dataOfReportSize = reports[i].dataLength;
+        if (0 == dataOfReportSize) {
+            continue;
+        }
         if(!(dataOfReport = static_cast<uint8_t*>(chreHeapAlloc(dataOfReportSize)))) {
         success = false;
             goto fail3;
         }
-        memcpy(&reportsOfeventData[i], &reports[i],
-               offsetof(chreBleAdvertisingReportWrapper, dataPointer));
         reportsOfeventData[i].data = dataOfReport;
         // copy the third level
-        memcpy(dataOfReport, reports->data, dataOfReportSize);
-        reportsOfeventData[i].reserved = reports[i].reserved;
+        data = static_cast<uint8_t*>(wasm_runtime_addr_app_to_native(
+                                            WasmModuleInst, reports->dataPointer));
+        memcpy(dataOfReport, data, dataOfReportSize);
+        
     }
     return eventData;
 fail3:
@@ -144,7 +151,7 @@ fail3:
         if(!reportsOfeventData[i].data) {
             break;
         }
-        chreHeapFree(reportsOfeventData[i].data);
+        chreHeapFree(const_cast<uint8_t*>(reportsOfeventData[i].data));
     }
     chreHeapFree(reportsOfeventData);
 fail2:
@@ -161,22 +168,22 @@ void chreBleAdvertisementEventWrapperRelease(wasm_module_inst_t WasmModuleInst,
     chreBleAdvertisementEventWrapper *structData = NULL;
     chreBleAdvertisingReportWrapper *reports = NULL;
     bool success = true;
-    if (!(structData = wasm_runtime_addr_app_to_native(WasmModuleInst, eventDataForWASM))) {
+    if (!(structData = static_cast<chreBleAdvertisementEventWrapper *>(
+                       wasm_runtime_addr_app_to_native(WasmModuleInst, eventDataForWASM)))) {
         success = false;
         goto fail1;
     }
-    if (!(reports = wasm_runtime_addr_app_to_native(WasmModuleInst, structData->reportsPointer))) {
+    if (!(reports = static_cast<chreBleAdvertisingReportWrapper *>(
+                    wasm_runtime_addr_app_to_native(WasmModuleInst, structData->reportsPointer)))) {
         success = false;
         goto fail2;
     }
-    for (int i = 0; i < eventData->numReports; ++i) {
+    for (int i = 0; i < structData->numReports; ++i) {
         if (0 == reports[i].dataPointer) {
-            success = false;
-            goto fail3;
+            continue;
         }
         wasm_runtime_module_free(WasmModuleInst, reports[i].dataPointer);
     }
-fail3:
     wasm_runtime_module_free(WasmModuleInst, structData->reportsPointer);
 fail2:
     wasm_runtime_module_free(WasmModuleInst, eventDataForWASM);
@@ -191,7 +198,7 @@ void chreBleAdvertisementEventRelease(chreBleAdvertisementEvent *eventData) {
     if (!eventData) {
         return;
     }
-    reportsOfeventData = eventData->reports;
+    reportsOfeventData = const_cast<chreBleAdvertisingReport *>(eventData->reports);
     if (!reportsOfeventData) {
         goto fail1;
     }
@@ -199,7 +206,7 @@ void chreBleAdvertisementEventRelease(chreBleAdvertisementEvent *eventData) {
         if(!reportsOfeventData[i].data) {
             goto fail2;
         }
-        chreHeapFree(reportsOfeventData[i].data);
+        chreHeapFree(const_cast<uint8_t*>(reportsOfeventData[i].data));
     }
 fail2:
     chreHeapFree(reportsOfeventData);
@@ -215,7 +222,7 @@ uint32_t chreBleGetCapabilitiesWrapper(wasm_exec_env_t exec_env){
 }
 
 uint32_t chreBleGetFilterCapabilitiesWrapper(wasm_exec_env_t exec_env){
-    return chreBleGetFilterCapabilities()
+    return chreBleGetFilterCapabilities();
 }
 
 bool chreBleStartScanAsyncWrapper(wasm_exec_env_t exec_env, enum chreBleScanMode mode,
@@ -227,15 +234,16 @@ bool chreBleStartScanAsyncWrapper(wasm_exec_env_t exec_env, enum chreBleScanMode
     if (!WasmModuleInst) {
         goto fail;
     }
-    tmp.scanFilters = wasm_runtime_addr_app_to_native(WasmModuleInst,
-                                                      filter->scanFiltersPointer);
+    tmp.scanFilters = static_cast<chreBleGenericFilter *>(
+                            wasm_runtime_addr_app_to_native(WasmModuleInst,
+                            filter->scanFiltersPointer));
     chreBleStartScanAsync(mode, reportDelayMs, &tmp);
 fail:
     return false;
 }
 
 bool chreBleStopScanAsyncWrapper(wasm_exec_env_t exec_env) {
-    chreBleStopScanAsync();
+    return chreBleStopScanAsync();
 }
 
 #ifdef __cplusplus
