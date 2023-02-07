@@ -53,7 +53,7 @@ chreAudioSourceStatusEvent *chreAudioSourceStatusEventCopiedFromWASM(wasm_module
                                                                                     eventDataForWASM));
     chreAudioSourceStatusEvent *eventData = NULL;
     if (!structData) {
-        LOGE("Try to copy memory not belong to the current Wasm instance!");
+        LOGE("Try to copy memory not belonging to the current Wasm instance!");
         goto fail;
     }
     eventData = reinterpret_cast<chreAudioSourceStatusEvent *>(chreHeapAlloc(sizeof(chreAudioSourceStatusEvent)));
@@ -124,7 +124,7 @@ chreAudioDataEvent *chreAudioDataEventCopiedFromWASM(wasm_module_inst_t WasmModu
     uint32_t bufferDataLength = 0;
     if(!(structData = static_cast<chreAudioDataEventWrapper *>(
                         wasm_runtime_addr_app_to_native(WasmModuleInst, eventDataForWASM)))) {
-        LOGE("Try to copy memory not belong to the current Wasm instance!");
+        LOGE("Try to copy memory not belonging to the current Wasm instance!");
         goto fail1;
     }
     if(!(eventData = static_cast<chreAudioDataEvent*>(chreHeapAlloc(sizeof(chreAudioDataEvent))))) {
@@ -143,6 +143,7 @@ chreAudioDataEvent *chreAudioDataEventCopiedFromWASM(wasm_module_inst_t WasmModu
     memcpy(eventData, structData, offsetof(chreAudioDataEventWrapper, _padding_0));
     //! Saved the pointer
     eventData->samplesULaw8 = bufferData;
+    return eventData;
 fail2:
     chreHeapFree(eventData);
 fail1:

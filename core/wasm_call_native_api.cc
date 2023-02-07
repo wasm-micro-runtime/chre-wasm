@@ -25,7 +25,12 @@ NativeSymbol native_symbols[] = {
     */
     //REG_NATIVE_FUNC(chreAudioGetStatus,"(i$)i"),
     //! audio.h end
-
+    //! ble.h begin
+    REG_NATIVE_FUNC(chreBleGetCapabilities,"()i"),
+    REG_NATIVE_FUNC(chreBleGetFilterCapabilities,"()i"),
+    REG_NATIVE_FUNC(chreBleStartScanAsync,"(ii$)i"),
+    REG_NATIVE_FUNC(chreBleStopScanAsync,"()i"),
+    //! ble.h end
     // //re.h begin
     // REG_NATIVE_FUNC(chreGetAppId,"()I"),
     // REG_NATIVE_FUNC(chreGetInstanceId,"()i"),
@@ -65,10 +70,7 @@ NativeSymbol native_symbols[] = {
     // REG_NATIVE_FUNC(chreUserSettingGetState, "(i)i"),
     // REG_NATIVE_FUNC(chreUserSettingConfigureEvents,"(ii)"),
     // //user_settings.h end
-    // //ble.h begin
-    // REG_NATIVE_FUNC(chreBleGetCapabilities,"()i"),
-    // REG_NATIVE_FUNC(chreBleGetFilterCapabilities,"()i"),
-    // //ble.h end
+
     // //gnss.h begin
     // REG_NATIVE_FUNC(chreGnssGetCapabilities,"()i"),
     // //todo: need to discuss 4
