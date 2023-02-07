@@ -22,7 +22,8 @@ COMMON_SRCS += $(CHRE_PREFIX)/core/nanoapp.cc
 COMMON_SRCS += $(CHRE_PREFIX)/core/settings.cc
 COMMON_SRCS += $(CHRE_PREFIX)/core/static_nanoapps.cc
 COMMON_SRCS += $(CHRE_PREFIX)/core/timer_pool.cc
-
+COMMON_SRCS += $(CHRE_PREFIX)/core/wamr_embed.cc
+COMMON_SRCS += $(CHRE_PREFIX)/core/wasm_call_native_api.cc
 # Optional audio support.
 ifeq ($(CHRE_AUDIO_SUPPORT_ENABLED), true)
 COMMON_SRCS += $(CHRE_PREFIX)/core/audio_request_manager.cc

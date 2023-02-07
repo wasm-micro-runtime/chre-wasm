@@ -67,6 +67,7 @@ $(1)_C_OBJS = $$(patsubst %.c, $(OUT)/$$($(1)_OBJS_DIR)/%.o, \
                           $$($(1)_C_SRCS))
 $(1)_S_OBJS = $$(patsubst %.S, $(OUT)/$$($(1)_OBJS_DIR)/%.o, \
                           $$($(1)_S_SRCS))
+$(1)_A_OBJS = $$(filter %.a, $(COMMON_SRCS) $(8))
 
 # Automatic dependency resolution Makefiles.
 $(1)_CC_DEPS = $$(patsubst %.cc, $(OUT)/$$($(1)_OBJS_DIR)/%.d, \
@@ -226,8 +227,8 @@ $$($(1)_SO): $$($(1)_CC_DEPS) \
 $$($(1)_BIN): $$($(1)_CC_DEPS) \
                $$($(1)_CPP_DEPS) $$($(1)_C_DEPS) $$($(1)_S_DEPS) \
                $$($(1)_CC_OBJS) $$($(1)_CPP_OBJS) $$($(1)_C_OBJS) \
-               $$($(1)_S_OBJS) | $$(OUT)/$(1) $$($(1)_DIRS)
-	$(V)$(3) -o $$@ $(11) $$(filter %.o, $$^) $(12) $(10)
+               $$($(1)_S_OBJS) $$($(1)_A_OBJS) | $$(OUT)/$(1) $$($(1)_DIRS)
+	$(V)$(3) -o $$@ $(11) $$(filter %.o, $$^) $$($(1)_A_OBJS) $(12) $(10)
 
 # Output Directories ###########################################################
 
@@ -279,6 +280,7 @@ TARGET_CFLAGS_LOCAL += -DCHRE_PLATFORM_ID=$(TARGET_PLATFORM_ID)
 
 # Default the nanoapp header flag values to signed if not overidden.
 TARGET_NANOAPP_FLAGS ?= 0x00000001
+
 $(eval $(call BUILD_TEMPLATE,$(TARGET_NAME), \
                              $(COMMON_CFLAGS) $(TARGET_CFLAGS_LOCAL) \
                                  $(NANOAPP_LATE_CFLAGS), \

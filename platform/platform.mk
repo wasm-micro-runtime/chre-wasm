@@ -224,7 +224,21 @@ SIM_SRCS += platform/shared/nanoapp/nanoapp_dso_util.cc
 SIM_SRCS += platform/shared/pal_system_api.cc
 SIM_SRCS += platform/shared/system_time.cc
 SIM_SRCS += platform/shared/version.cc
-
+SIM_SRCS += platform/shared/chre_wrapper.cc
+SIM_SRCS += platform/shared/chre_api_wrapper/audio_wrapper.cc
+SIM_SRCS += platform/shared/chre_api_wrapper/gnss_wrapper.cc
+SIM_SRCS += platform/shared/chre_api_wrapper/sensor_wrapper.cc
+SIM_SRCS += platform/shared/chre_api_wrapper/wifi_wrapper.cc
+SIM_SRCS += platform/shared/chre_api_wrapper/ble_wrapper.cc
+SIM_SRCS += platform/shared/chre_api_wrapper/nanoapp_support_wasm_wrapper.cc
+SIM_SRCS += platform/shared/chre_api_wrapper/toolchain_wrapper.cc
+SIM_SRCS += platform/shared/chre_api_wrapper/wwan_wrapper.cc
+SIM_SRCS += platform/shared/chre_api_wrapper/common_wrapper.cc
+SIM_SRCS += platform/shared/chre_api_wrapper/nanoapp_wrapper.cc
+SIM_SRCS += platform/shared/chre_api_wrapper/user_settings_wrapper.cc
+SIM_SRCS += platform/shared/chre_api_wrapper/event_wrapper.cc
+SIM_SRCS += platform/shared/chre_api_wrapper/re_wrapper.cc
+SIM_SRCS += platform/shared/chre_api_wrapper/version_wrapper.cc
 # Optional audio support.
 ifeq ($(CHRE_AUDIO_SUPPORT_ENABLED), true)
 SIM_SRCS += platform/linux/pal_audio.cc
