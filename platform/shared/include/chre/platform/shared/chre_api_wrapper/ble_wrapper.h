@@ -1,9 +1,9 @@
+#ifndef _BLE_WRAPPER_H_
+#define _BLE_WRAPPER_H_
+
 #include "chre/ble.h"
 #include "stddef.h"
 #include "wasm_export.h"
-
-#ifndef _BLE_WRAPPER_H_
-#define _BLE_WRAPPER_H_
 
 #ifdef __cplusplus
 extern "C" {

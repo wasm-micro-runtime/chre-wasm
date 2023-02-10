@@ -1,9 +1,9 @@
+#ifndef _COMMON_WRAPPER_H_
+#define _COMMON_WRAPPER_H_
+
 #include "chre/common.h"
 #include "stddef.h"
 #include "wasm_export.h"
-
-#ifndef _COMMON_WRAPPER_H_
-#define _COMMON_WRAPPER_H_
 
 #ifdef __cplusplus
 extern "C" {

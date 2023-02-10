@@ -1,6 +1,7 @@
 
 #ifndef _EVENT_TRANSFORM_H_
 #define _EVENT_TRANSFORM_H_
+
 #include "chre/platform/shared/chre_api_wrapper/event_transform.h"
 #include "wasm_export.h"
 

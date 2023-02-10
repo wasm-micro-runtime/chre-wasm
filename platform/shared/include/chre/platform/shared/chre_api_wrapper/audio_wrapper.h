@@ -1,9 +1,9 @@
+#ifndef _AUDIO_WRAPPER_H_
+#define _AUDIO_WRAPPER_H_
+
 #include "chre/audio.h"
 #include "stddef.h"
 #include "wasm_export.h"
-
-#ifndef _AUDIO_WRAPPER_H_
-#define _AUDIO_WRAPPER_H_
 
 #ifdef __cplusplus
 extern "C" {

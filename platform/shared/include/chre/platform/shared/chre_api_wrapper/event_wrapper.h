@@ -1,9 +1,9 @@
+#ifndef _EVENT_WRAPPER_H_
+#define _EVENT_WRAPPER_H_
+
 #include "chre/event.h"
 #include "stddef.h"
 #include "wasm_export.h"
-
-#ifndef _EVENT_WRAPPER_H_
-#define _EVENT_WRAPPER_H_
 
 #ifdef __cplusplus
 extern "C" {
