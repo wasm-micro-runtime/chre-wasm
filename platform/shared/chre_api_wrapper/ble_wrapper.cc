@@ -237,7 +237,7 @@ bool chreBleStartScanAsyncWrapper(wasm_exec_env_t exec_env, enum chreBleScanMode
     tmp.scanFilters = static_cast<chreBleGenericFilter *>(
                             wasm_runtime_addr_app_to_native(WasmModuleInst,
                             filter->scanFiltersPointer));
-    chreBleStartScanAsync(mode, reportDelayMs, &tmp);
+    return chreBleStartScanAsync(mode, reportDelayMs, &tmp);
 fail:
     return false;
 }
