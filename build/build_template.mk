@@ -280,6 +280,20 @@ TARGET_CFLAGS_LOCAL += -DCHRE_PLATFORM_ID=$(TARGET_PLATFORM_ID)
 
 # Default the nanoapp header flag values to signed if not overidden.
 TARGET_NANOAPP_FLAGS ?= 0x00000001
+#$(error $(call BUILD_TEMPLATE,$(TARGET_NAME), \
+                             $(COMMON_CFLAGS) $(TARGET_CFLAGS_LOCAL) \
+                                 $(NANOAPP_LATE_CFLAGS), \
+                             $(TARGET_CC), \
+                             $(TARGET_SO_LDFLAGS), \
+                             $(TARGET_LD), \
+                             $(TARGET_ARFLAGS), \
+                             $(TARGET_AR), \
+                             $(TARGET_VARIANT_SRCS), \
+                             $(TARGET_BUILD_BIN), \
+                             $(TARGET_BIN_LDFLAGS), \
+                             $(TARGET_SO_EARLY_LIBS), \
+                             $(TARGET_SO_LATE_LIBS), \
+                             $(TARGET_PLATFORM_ID)))
 
 $(eval $(call BUILD_TEMPLATE,$(TARGET_NAME), \
                              $(COMMON_CFLAGS) $(TARGET_CFLAGS_LOCAL) \
