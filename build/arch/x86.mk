@@ -25,6 +25,9 @@ TARGET_CFLAGS += $(X86_CFLAGS)
 # x86 is purely used for testing, so always include debugging symbols
 TARGET_CFLAGS += -g
 
+# Set the instruction to 32 bits to cater to WASM32 and the actual running environment
+TARGET_CFLAGS += -m32
+
 # Enable position independence.
 TARGET_CFLAGS += -fpic
 
