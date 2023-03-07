@@ -26,6 +26,12 @@ TARGET_CFLAGS += -Wconversion
 # disable it.
 TARGET_CFLAGS += $(GOOGLE_X86_LINUX_CFLAGS)
 
+# Set the instruction to 32 bits to cater to WASM32 and the actual running environment
+TARGET_CFLAGS += -m32
+TARGET_BIN_LDFLAGS += -m32
+TARGET_BIN_LDFLAGS += -L/usr/lib32
+TARGET_NANOAPP_FLAGS += -m32
+COMMON_CFLAGS += -m32
 ifneq ($(filter $(TARGET_NAME)% all, $(MAKECMDGOALS)),)
 ifneq ($(IS_NANOAPP_BUILD),)
 include $(CHRE_PREFIX)/build/nanoapp/google_linux.mk
