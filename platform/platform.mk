@@ -240,6 +240,7 @@ SIM_SRCS += platform/shared/chre_api_wrapper/event_wrapper.cc
 SIM_SRCS += platform/shared/chre_api_wrapper/event_transform.cc
 SIM_SRCS += platform/shared/chre_api_wrapper/re_wrapper.cc
 SIM_SRCS += platform/shared/chre_api_wrapper/version_wrapper.cc
+SIM_SRCS += platform/shared/chre_api_wrapper/wrapper_data_map.cc
 # Optional audio support.
 ifeq ($(CHRE_AUDIO_SUPPORT_ENABLED), true)
 SIM_SRCS += platform/linux/pal_audio.cc
