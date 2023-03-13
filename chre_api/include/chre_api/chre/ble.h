@@ -272,23 +272,18 @@ enum chreBleAdType {
  *   dataMask = {0xFF, 0xFF}
  */
 struct chreBleGenericFilter {
-  //! Acceptable values among enum chreBleAdType
   uint8_t type;
-
-  /**
-   * Length of data and dataMask. AD payloads shorter than this length will not
-   * be matched by the filter. Length must be greater than 0.
-   */
   uint8_t len;
-
-  //! Used in combination with dataMask to filter an advertisement
   uint8_t data[CHRE_BLE_DATA_LEN_MAX];
-
-  //! Used in combination with data to filter an advertisement
   uint8_t dataMask[CHRE_BLE_DATA_LEN_MAX];
 };
+static_assert(sizeof(chreBleGenericFilter) == 2 + CHRE_BLE_DATA_LEN_MAX + CHRE_BLE_DATA_LEN_MAX
+              && offsetof(chreBleGenericFilter, type) == 0
+              && offsetof(chreBleGenericFilter, len) == 1
+              && offsetof(chreBleGenericFilter, data) == 2
+              && offsetof(chreBleGenericFilter, dataMask) == 2 + CHRE_BLE_DATA_LEN_MAX);
 
-/**
+/**S
  * CHRE Bluetooth LE scan filters are based on a combination of an RSSI
  * threshold and generic scan filters as defined by AD Type, mask, and values.
  *
@@ -325,6 +320,10 @@ struct chreBleScanFilter {
   //! (functional OR).
   const struct chreBleGenericFilter *scanFilters;
 };
+static_assert(sizeof(chreBleScanFilter) == 8
+              && offsetof(chreBleScanFilter, rssiThreshold) == 0
+              && offsetof(chreBleScanFilter, scanFilterCount) == 1
+              && offsetof(chreBleScanFilter, scanFilters) == 4);
 
 /**
  * CHRE BLE advertising address type is based on the BT Core Spec v5.2, Vol 4,
@@ -437,6 +436,22 @@ struct chreBleAdvertisingReport {
   //! Reserved for future use; set to 0
   uint32_t reserved;
 };
+static_assert(sizeof(chreBleAdvertisingReport) == 40
+              && offsetof(chreBleAdvertisingReport, timestamp) == 0
+              && offsetof(chreBleAdvertisingReport, eventTypeAndDataStatus) == 8
+              && offsetof(chreBleAdvertisingReport, addressType) == 9
+              && offsetof(chreBleAdvertisingReport, address) == 10
+              && offsetof(chreBleAdvertisingReport, primaryPhy) == 10 + CHRE_BLE_ADDRESS_LEN
+              && offsetof(chreBleAdvertisingReport, secondaryPhy) == 11 + CHRE_BLE_ADDRESS_LEN
+              && offsetof(chreBleAdvertisingReport, advertisingSid) == 12 + CHRE_BLE_ADDRESS_LEN
+              && offsetof(chreBleAdvertisingReport, txPower) == 13 + CHRE_BLE_ADDRESS_LEN
+              && offsetof(chreBleAdvertisingReport, periodicAdvertisingInterval) == 14 + CHRE_BLE_ADDRESS_LEN
+              && offsetof(chreBleAdvertisingReport, rssi) == 16 + CHRE_BLE_ADDRESS_LEN
+              && offsetof(chreBleAdvertisingReport, directAddressType) == 17 + CHRE_BLE_ADDRESS_LEN
+              && offsetof(chreBleAdvertisingReport, directAddress) == 18 +  CHRE_BLE_ADDRESS_LEN
+              && offsetof(chreBleAdvertisingReport, dataLength) == 18 + 2 * CHRE_BLE_ADDRESS_LEN
+              && offsetof(chreBleAdvertisingReport, data) == 20 + 2 * CHRE_BLE_ADDRESS_LEN
+              && offsetof(chreBleAdvertisingReport, reserved) == 24 + 2 * CHRE_BLE_ADDRESS_LEN);
 
 /**
  * A CHRE BLE Advertising Event can contain any number of CHRE BLE Advertising
@@ -452,6 +467,10 @@ struct chreBleAdvertisementEvent {
   //! Array of length numReports
   const struct chreBleAdvertisingReport *reports;
 };
+static_assert(sizeof(chreBleAdvertisementEvent) == 8
+              && offsetof(chreBleAdvertisementEvent, reserved) == 0
+              && offsetof(chreBleAdvertisementEvent, numReports) == 2
+              && offsetof(chreBleAdvertisementEvent, reports) == 4);
 
 /**
  * Retrieves a set of flags indicating the BLE features supported by the
@@ -614,5 +633,7 @@ bool chreBleStopScanAsync(void);
 #ifdef __cplusplus
 }
 #endif
+
+#include "chre/platform/shared/chre_api_wrapper/ble_assert.h"
 
 #endif /* CHRE_BLE_H_ */
