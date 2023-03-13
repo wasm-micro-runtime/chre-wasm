@@ -426,4 +426,6 @@ bool chreAudioGetStatus(uint32_t handle, struct chreAudioSourceStatus *status);
 }
 #endif
 
+#include "chre/platform/shared/chre_api_wrapper/audio_assert.h"
+
 #endif  /* _CHRE_AUDIO_H_ */
