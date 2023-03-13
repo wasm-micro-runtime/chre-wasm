@@ -8,7 +8,7 @@
 extern "C" {
 #endif
 
-//problem: const char* in chreAudioSource
+
 bool chreAudioGetSourceWrapper(wasm_exec_env_t exec_env, uint32_t handle, 
                                struct chreAudioSource *audioSource) {
     uint32_t nameOffset = 0;

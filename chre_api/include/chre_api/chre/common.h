@@ -177,4 +177,6 @@ struct chreAsyncResult {
 }
 #endif
 
+#include "chre/platform/shared/chre_api_wrapper/common_assert.h"
+
 #endif /* _CHRE_COMMON_H_ */

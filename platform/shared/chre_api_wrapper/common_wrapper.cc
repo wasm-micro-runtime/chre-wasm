@@ -9,61 +9,55 @@
 extern "C" {
 #endif
 
-//! struct chreAsyncResult begin
-uint32_t chreAsyncResultWrapperCopiedFromNative(wasm_module_inst_t WasmModuleInst,
-                                                const chreAsyncResult *eventData) {
-    uint32_t structDataOffset = 0;
-    chreAsyncResultWrapper *structData = NULL;
-    if (!eventData) {
-        goto fail;
+NATIVE_TO_WASM_FUNCTION_DECLARATION(chreAsyncResult) {
+    const struct chreAsyncResult *native_event = 
+            reinterpret_cast<const struct chreAsyncResult *>(nativeData);
+
+    uint32_t offset_event = 0;
+
+    struct chreAsyncResult *pointer_event = NULL;
+    offset_event = wasm_runtime_module_malloc(WasmModuleInst, sizeof(struct chreAsyncResult),
+                                                        reinterpret_cast<void**>(&pointer_event));
+    if(!offset_event) {
+        LOGE("Allocate memory for struct chreAsyncResult in Wasm failed");
+        goto fail0;
     }
-    structDataOffset = wasm_runtime_module_malloc(WasmModuleInst,
-                                                  sizeof(chreAsyncResultWrapper),
-                                                  reinterpret_cast<void**>(&structData));
-    if(!structDataOffset) {
-        goto fail;
-    }
-    //! copy the part of the struct chreAsyncResult
-    memcpy(structData, eventData, offsetof(chreAsyncResultWrapper, cookiePointer));
-    //! the cookie must be passed from the same nanoapp
-    /**
-     * @todo maybe we need to discuss what the value of nullptr is here
-    */
-    structData->cookiePointer = wasm_runtime_addr_native_to_app(WasmModuleInst,
-                                            const_cast<void*>(eventData->cookie));
-    return structDataOffset;
-fail:
-    LOGE("Allocate memory for struct chreAsyncResult in Wasm failed");
+    memcpy(pointer_event, native_event, offsetof(struct chreAsyncResult, cookie));
+    pointer_event->cookie = reinterpret_cast<const void*>(
+            wasm_runtime_addr_native_to_app(WasmModuleInst, const_cast<void*>(native_event->cookie)));
+    return offset_event;
+fail0:
     return 0;
 }
-chreAsyncResult *chreAsyncResultCopiedFromWASM(wasm_module_inst_t WasmModuleInst,
-                                               uint32_t eventDataForWASM) {
-    chreAsyncResultWrapper *structData = nullptr;
-    chreAsyncResult *eventData = nullptr;
-    if(!(structData = static_cast<chreAsyncResultWrapper *> (
-        wasm_runtime_addr_app_to_native(WasmModuleInst, eventDataForWASM)))) {
+
+WASM_TO_NATIVE_FUNCTION_DECLARATION(chreAsyncResult) {
+    const struct chreAsyncResult *wasm_event =NULL;
+    
+    struct chreAsyncResult *pointer_event = NULL;
+    if (!wasm_runtime_validate_app_addr(WasmModuleInst, eventDataForWASM, sizeof(struct chreAsyncResult))) {
+        LOGE("Try to copied wasm memory out of boundary");
         goto fail;
     }
-    if(!(eventData = static_cast<chreAsyncResult *>(
-                        chreHeapAlloc(sizeof(chreAsyncResult))))) {
-        goto fail;
+    if (!(pointer_event = 
+            reinterpret_cast<struct chreAsyncResult*>(chreHeapAlloc(sizeof(struct chreAsyncResult))))) {
+        LOGE("Allocate memory for struct chreAsyncResult in Native failed!");    
     }
-    memcpy(eventData, structData, offsetof(chreAsyncResultWrapper, cookiePointer));
-    eventData->cookie = wasm_runtime_addr_app_to_native(WasmModuleInst,
-                                                        structData->cookiePointer);
-    return eventData;
+    wasm_event = reinterpret_cast<const struct chreAsyncResult *>(
+                    wasm_runtime_addr_app_to_native(WasmModuleInst, eventDataForWASM));
+    memcpy(pointer_event, wasm_event, offsetof(struct chreAsyncResult, cookie));
+    pointer_event->cookie = wasm_runtime_addr_app_to_native(WasmModuleInst,
+                                    reinterpret_cast<uint32_t>(wasm_event->cookie));
+    return pointer_event;
 fail:
-    LOGE("Allocate memory for struct chreAsyncResult in Native failed!");
     return nullptr;
 }
 
-void chreAsyncResultWrapperRelease(wasm_module_inst_t WasmModuleInst,
-                                              uint32_t eventDataForWASM) {
+FREE_WASM_EVENT_FUNCTION_DECLARATION(chreAsyncResult) {
     wasm_runtime_module_free(WasmModuleInst, eventDataForWASM);
 }
 
-void chreAsyncResultRelease(chreAsyncResult *eventData) {
-    chreHeapFree(eventData);
+FREE_NATIVE_EVENT_FUNCTION_DECLARATION(chreAsyncResult) {
+    chreHeapFree(nativeData);
 }
 
 #ifdef __cplusplus
