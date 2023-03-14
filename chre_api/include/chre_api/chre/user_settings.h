@@ -139,4 +139,6 @@ void chreUserSettingConfigureEvents(uint8_t setting, bool enable);
 }
 #endif
 
+#include "chre/platform/shared/chre_api_wrapper/user_settings_assert.h"
+
 #endif  /* _CHRE_USER_SETTINGS_H_ */
