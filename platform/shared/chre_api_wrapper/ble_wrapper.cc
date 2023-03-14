@@ -50,26 +50,30 @@ NATIVE_TO_WASM_FUNCTION_DECLARATION(chreBleAdvertisementEvent){
     memcpy(pointer_event, nativeEvent, offsetof(struct chreBleAdvertisementEvent, reports));
     
     //copy second level
-    offset_event_reports = wasm_runtime_addr_native_to_app(WasmModuleInst, nowBuffer);
-    pointer_event_reports = reinterpret_cast<struct chreBleAdvertisingReport*>(nowBuffer);
-    nowBuffer += secondLevelSize;
-    
-    pointer_event->reports = reinterpret_cast<struct chreBleAdvertisingReport*>(offset_event_reports);
-    memcpy(pointer_event_reports, nativeEvent->reports, secondLevelSize);
-
-    //copy third level
-    for (uint16_t i = 0; i<nativeEvent->numReports ;++i) {
-        const struct chreBleAdvertisingReport *nowReports = &(nativeEvent->reports[i]);
+    if (0 != secondLevelSize) {
+        offset_event_reports = wasm_runtime_addr_native_to_app(WasmModuleInst, nowBuffer);
+        pointer_event_reports = reinterpret_cast<struct chreBleAdvertisingReport*>(nowBuffer);
+        nowBuffer += secondLevelSize;
         
-        offset_event_reports_data = wasm_runtime_addr_native_to_app(WasmModuleInst, nowBuffer);
-        pointer_event_reports_data = nowBuffer;
-        nowBuffer +=  nowReports->dataLength;
+        pointer_event->reports = reinterpret_cast<struct chreBleAdvertisingReport*>(offset_event_reports);
+        memcpy(pointer_event_reports, nativeEvent->reports, secondLevelSize);
 
-        pointer_event_reports[i].data = reinterpret_cast<const uint8_t *>(offset_event_reports_data);
-        memcpy(pointer_event_reports_data, nowReports->data, nowReports->dataLength);
+        //copy third level
+        for (uint16_t i = 0; i<nativeEvent->numReports ;++i) {
+            const struct chreBleAdvertisingReport *nowReports = &(nativeEvent->reports[i]);
+            if (0 == nowReports->dataLength){
+                continue;
+            }
+            offset_event_reports_data = wasm_runtime_addr_native_to_app(WasmModuleInst, nowBuffer);
+            pointer_event_reports_data = nowBuffer;
+            nowBuffer +=  nowReports->dataLength;
+
+            pointer_event_reports[i].data = reinterpret_cast<const uint8_t *>(offset_event_reports_data);
+            memcpy(pointer_event_reports_data, nowReports->data, nowReports->dataLength);
+        }
     }
     if (nowBuffer != dataBuffer + totalSize) {
-        LOGE("Copy the wrong size of memory in native2wasm");
+        LOGE("Copy the wrong size of memory in native2wasm: struct chreBleAdvertisementEvent");
         wasm_runtime_module_free(WasmModuleInst, dataOffset);
         goto fail;
     }
@@ -127,33 +131,38 @@ WASM_TO_NATIVE_FUNCTION_DECLARATION(chreBleAdvertisementEvent){
     memcpy(pointer_event, wasm_event, offsetof(struct chreBleAdvertisementEvent, reports));
     
     //copy second level
-    pointer_event_reports = reinterpret_cast<struct chreBleAdvertisingReport*>(nowBuffer);
-    nowBuffer += secondLevelSize;
-    
-    pointer_event->reports = pointer_event_reports;
-    if(!wasm_runtime_validate_app_addr(WasmModuleInst, reinterpret_cast<uint32_t>(wasm_event->reports),
-            secondLevelSize)) {
-        goto fail1;
-    }
-    memcpy(pointer_event_reports, wasm_event_reports, secondLevelSize);
-
-    //copy third level
-    for (uint16_t i = 0; i<wasm_event->numReports ;++i) {
-        wasm_event_reports_data = reinterpret_cast<uint8_t*>(
-                wasm_runtime_addr_app_to_native(WasmModuleInst, reinterpret_cast<uint32_t>(wasm_event_reports[i].data)));
+    if (0 != secondLevelSize) {
+        pointer_event_reports = reinterpret_cast<struct chreBleAdvertisingReport*>(nowBuffer);
+        nowBuffer += secondLevelSize;
         
-        pointer_event_reports_data = nowBuffer;
-        nowBuffer +=  wasm_event_reports[i].dataLength;
-
-        pointer_event_reports[i].data = pointer_event_reports_data;
-        if(!wasm_runtime_validate_app_addr(WasmModuleInst, reinterpret_cast<uint32_t>(wasm_event_reports[i].data),
-                wasm_event_reports->dataLength)) {
+        pointer_event->reports = pointer_event_reports;
+        if(!wasm_runtime_validate_app_addr(WasmModuleInst, reinterpret_cast<uint32_t>(wasm_event->reports),
+                secondLevelSize)) {
             goto fail1;
         }
-        memcpy(pointer_event_reports_data, wasm_event_reports_data, wasm_event_reports[i].dataLength);
+        memcpy(pointer_event_reports, wasm_event_reports, secondLevelSize);
+
+        //copy third level
+        for (uint16_t i = 0; i<wasm_event->numReports ;++i) {
+            if (0 == wasm_event_reports[i].dataLength) {
+                continue;
+            }
+            if(!wasm_runtime_validate_app_addr(WasmModuleInst, reinterpret_cast<uint32_t>(wasm_event_reports[i].data),
+                    wasm_event_reports->dataLength)) {
+                goto fail1;
+            }
+            wasm_event_reports_data = reinterpret_cast<uint8_t*>(
+                    wasm_runtime_addr_app_to_native(WasmModuleInst, reinterpret_cast<uint32_t>(wasm_event_reports[i].data)));
+            
+            pointer_event_reports_data = nowBuffer;
+            nowBuffer +=  wasm_event_reports[i].dataLength;
+
+            pointer_event_reports[i].data = pointer_event_reports_data;
+            memcpy(pointer_event_reports_data, wasm_event_reports_data, wasm_event_reports[i].dataLength);
+        }
     }
     if (nowBuffer != dataBuffer + totalSize) {
-        LOGE("Copy the wrong size of memory in wasm2native");
+        LOGE("Copy the wrong size of memory in wasm2native: struct chreBleAdvertisementEvent");
         chreHeapFree(dataBuffer);
         goto fail0;
     }
