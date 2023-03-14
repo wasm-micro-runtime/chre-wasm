@@ -601,4 +601,6 @@ bool chreGnssConfigurePassiveLocationListener(bool enable);
 }
 #endif
 
+#include "chre/platform/shared/chre_api_wrapper/gnss_assert.h"
+
 #endif  /* _CHRE_GNSS_H_ */
