@@ -1,4 +1,3 @@
-
 #include "chre/util/macros.h"
 #include "chre/util/system/napp_permissions.h"
 #include "chre/platform/shared/chre_api_wrapper/event_wrapper.h"
@@ -9,194 +8,143 @@
 #include "memory.h"
 #include <stddef.h>
 #include <stdint.h>
+
 #ifdef __cplusplus
 extern "C" {
 #endif
-/**
- * @see wasm_runtime_call_indirect in wasm_runtime_common.h
-*/
-bool
-wasm_runtime_call_indirect(WASMExecEnv *exec_env, uint32_t element_indices,
-                           uint32_t argc, uint32_t argv[]);
 
-//! struct chreMessageFromHostDataWrapper start
-uint32_t chreMessageFromHostDataWrapperCopiedFromNative(wasm_module_inst_t WasmModuleInst,
-                                                        const chreMessageFromHostData *eventData) {
-    uint32_t structDataOffset = 0;
-    uint32_t messageOffset = 0;
-    chreMessageFromHostDataWrapper *structData = NULL;
-    void* message = NULL;
-    uint32_t messageSize = eventData->messageSize;
-    if(!(structDataOffset = wasm_runtime_module_malloc(WasmModuleInst, sizeof(chreMessageFromHostDataWrapper),
-                                                       reinterpret_cast<void**>(&structData)))) {
+//! struct chreMessageFromHostData start
+NATIVE_TO_WASM_FUNCTION_DECLARATION(chreMessageFromHostData) {
+    const struct chreMessageFromHostData *native_event = 
+            reinterpret_cast<const struct chreMessageFromHostData *>(nativeData);
+    uint32_t offset_event = 0;
+    uint32_t offset_event_message = 0;
+
+    struct chreMessageFromHostData *pointer_event = NULL;
+    void *pointer_event_message = NULL;
+
+    uint32_t totalSize = 0;
+    uint8_t *dataBuffer = NULL, *nowBuffer = NULL;
+
+    //caculate size
+    // level 1
+    totalSize += sizeof(struct chreMessageFromHostData);
+    // level 2
+    totalSize += native_event->messageSize;
+
+    offset_event = wasm_runtime_module_malloc(WasmModuleInst, totalSize, 
+                                              reinterpret_cast<void**>(&dataBuffer));
+    if (!offset_event) {
+        LOGE("Allocate memory for struct chreMessageFromHostData in Wasm failed!");
+        goto fail0;
+    }
+    nowBuffer = dataBuffer;
+
+    //copy level 1
+    pointer_event = reinterpret_cast<struct chreMessageFromHostData *>(nowBuffer);
+    nowBuffer += sizeof(struct chreMessageFromHostData);
+    memcpy(pointer_event, native_event, sizeof(struct chreMessageFromHostData));
+
+    //copy level 2
+    if (0 != native_event->messageSize) {
+        offset_event_message = wasm_runtime_addr_native_to_app(WasmModuleInst, nowBuffer);
+        pointer_event_message = nowBuffer;
+        nowBuffer += native_event->messageSize;
+        memcpy(pointer_event_message, native_event->message, native_event->messageSize);
+        pointer_event->message = pointer_event_message;
+    }
+
+    if (nowBuffer + totalSize != dataBuffer) {
+        LOGE("Copy the wrong size of memory in native2wasm: struct chreMessageFromHostData");
         goto fail1;
     }
-    if(messageSize && !(messageOffset  = wasm_runtime_module_malloc(WasmModuleInst, messageSize,
-                                                                    reinterpret_cast<void**>(&message)))) {
-        goto fail2;
-    }
-    if(messageSize) {
-        memcpy(message, eventData->message, messageSize);
-    }
-    memcpy(structData, eventData, offsetof(chreMessageFromHostDataWrapper, messagePointer));
-    structData->messagePointer = messageOffset;
-    structData->hostEndpoint = eventData->hostEndpoint;
-    return structDataOffset;
-fail2:
-    wasm_runtime_module_free(WasmModuleInst, structDataOffset);
+    return offset_event;
 fail1:
-    LOGE("");
+    wasm_runtime_module_free(WasmModuleInst, offset_event);
+fail0:
     return 0;
 }
-chreMessageFromHostData *chreMessageFromHostDataCopiedFromWASM(wasm_module_inst_t WasmModuleInst,
-                                                               uint32_t eventDataForWASM) {
-    chreMessageFromHostData *eventData = NULL;
-    void* messageForEventData = NULL;
-    chreMessageFromHostDataWrapper *structData = NULL;
-    void *message = NULL;
-    if (!(structData = static_cast<chreMessageFromHostDataWrapper*>(
-                                    wasm_runtime_addr_app_to_native(WasmModuleInst, eventDataForWASM)))) {
+WASM_TO_NATIVE_FUNCTION_DECLARATION(chreMessageFromHostData) {
+    const struct chreMessageFromHostData *wasm_event = NULL;
+    const void *wasm_event_message = NULL;
+    
+    struct chreMessageFromHostData *pointer_event = NULL;
+    void *pointer_event_message = NULL;
+
+    uint32_t totalSize = 0;
+    uint8_t *dataBuffer = NULL, *nowBuffer = NULL;
+
+    //caculate size and validate boundary
+    //level 1
+    totalSize += sizeof(struct chreMessageFromHostData); 
+    if (!wasm_runtime_validate_app_addr(WasmModuleInst, eventDataForWASM,
+                                        sizeof(struct chreMessageFromHostData))) {
+        LOGE("The wasm memory to be copied is out of the boundary");
+        goto fail0;
+    }
+    wasm_event = reinterpret_cast<const struct chreMessageFromHostData *>(
+                        wasm_runtime_addr_app_to_native(WasmModuleInst, eventDataForWASM));
+    //level 2
+    totalSize += wasm_event->messageSize;
+    if (!wasm_runtime_validate_app_addr(WasmModuleInst, reinterpret_cast<uint32_t>(wasm_event->message),
+                                        wasm_event->messageSize)) {
+        LOGE("The wasm memory to be copied is out of the boundary");
+        goto fail0;
+    }
+    wasm_event_message = wasm_runtime_addr_app_to_native(WasmModuleInst,
+                                reinterpret_cast<uint32_t>(wasm_event->message));
+
+    dataBuffer = reinterpret_cast<uint8_t *>(chreHeapAlloc(totalSize));
+    if (!dataBuffer) {
+        LOGE("Allocate memory for struct chreMessageFromHostData in Native failed!");
+        goto fail0;
+    }
+    nowBuffer = dataBuffer;
+    //copy level 1
+    pointer_event = reinterpret_cast<struct chreMessageFromHostData*>(nowBuffer);
+    nowBuffer += sizeof(struct chreMessageFromHostData);
+    memcpy(pointer_event, wasm_event, sizeof(struct chreMessageFromHostData));
+    //copy level 2
+    if (0 != wasm_event->messageSize) {
+        pointer_event_message = reinterpret_cast<void *>(nowBuffer);
+        nowBuffer += wasm_event->messageSize;
+        memcpy(pointer_event_message, wasm_event_message, wasm_event->messageSize);
+        pointer_event->message = pointer_event_message;
+    }
+    if (dataBuffer + totalSize != nowBuffer) {
+        LOGE("Copy the wrong size of memory in wasm2native: struct chreMessageFromHostData");
         goto fail1;
     }
-    if(structData->messagePointer && !(message = wasm_runtime_addr_app_to_native(WasmModuleInst, 
-                                                                        structData->messagePointer))) {
-        goto fail1;
-    }
-    if(!(eventData = static_cast<chreMessageFromHostData *>(
-                                chreHeapAlloc(sizeof(chreMessageFromHostDataWrapper))))) {
-        goto fail1;
-    }
-    if(!(messageForEventData = chreHeapAlloc(structData->messageSize))) {
-        goto fail2;
-    }
-    memcpy(messageForEventData, message, structData->messageSize);
-    memcpy(eventData, structData, offsetof(chreMessageFromHostDataWrapper, messagePointer));
-    eventData->message = messageForEventData;
-    eventData->hostEndpoint = structData->hostEndpoint;
-    return eventData;
-fail2:
-    chreHeapFree(eventData);
+    return pointer_event;
 fail1:
-    LOGE("");
+    chreHeapFree(dataBuffer);
+fail0:
     return nullptr;
 }
 
-void chreMessageFromHostDataWrapperRelease(wasm_module_inst_t WasmModuleInst,
-                                           uint32_t eventDataForWASM) {
-    chreMessageFromHostDataWrapper *structData = NULL;
-    if (!eventDataForWASM || !(structData = reinterpret_cast<chreMessageFromHostDataWrapper*>(
-                                    wasm_runtime_addr_app_to_native(WasmModuleInst, eventDataForWASM)))) {
-        LOGE("");
-        return;
-    }
-    if (structData->messagePointer) {
-        wasm_runtime_module_free(WasmModuleInst, structData->messagePointer);
-    }
+FREE_WASM_EVENT_FUNCTION_DECLARATION(chreMessageFromHostData) {
+    wasm_runtime_module_free(WasmModuleInst, eventDataForWASM);
 }
 
-void chreMessageFromHostDataRelease(chreMessageFromHostData *eventData) {
-    if (!eventData) {
-        return;
-    }
-    if(eventData->message) {
-        chreHeapFree(const_cast<void*>(eventData->message));
-    }
-    chreHeapFree(eventData);
+FREE_NATIVE_EVENT_FUNCTION_DECLARATION(chreMessageFromHostData) {
+    chreHeapFree(nativeData);
 }
-
-
 
 
 //struct chreNanoappInfo start
-uint32_t chreNanoappInfoWrapperCopiedFromNative(wasm_module_inst_t WasmModuleInst,
-                                                const chreNanoappInfo *eventData) {
-    uint32_t structDataOffset = 0;
-    chreNanoappInfoWrapper *structData = NULL;
-    if(!(structDataOffset = wasm_runtime_module_malloc(WasmModuleInst, sizeof(chreNanoappInfoWrapper),
-                                                       reinterpret_cast<void**>(&structData)))) {
-        goto fail1;
-    }
-    memcpy(structData, eventData, sizeof(chreNanoappInfoWrapper));
-    return structDataOffset;
-fail1:
-    LOGE("");
-    return 0;
-}
-chreNanoappInfo *chreNanoappInfoCopiedFromWASM(wasm_module_inst_t WasmModuleInst,
-                                               uint32_t eventDataForWASM) {
-    chreNanoappInfo *eventData = NULL;
-    chreNanoappInfoWrapper *structData = NULL;
-    if (!(structData = reinterpret_cast<chreNanoappInfoWrapper*>(
-                            wasm_runtime_addr_app_to_native(WasmModuleInst, eventDataForWASM)))) {
-        goto fail1;
-    }
-    if(!(eventData = reinterpret_cast<chreNanoappInfo*>(chreHeapAlloc(sizeof(chreNanoappInfo))))) {
-        goto fail1;
-    }
-    memcpy(eventData, structData, sizeof(chreNanoappInfo));
-    return eventData;
-fail1:
-    LOGE("");
-    return nullptr;    
-}
+STRUCTURE_WITH_NO_POINTER_FUNCTIONS_IMPLEMENT(chreNanoappInfo);
 
-void chreNanoappInfoWrapperRelease(wasm_module_inst_t WasmModuleInst,
-                                   uint32_t eventDataForWASM) {
-    wasm_runtime_module_free(WasmModuleInst, eventDataForWASM);
-}
-
-void chreNanoappInfoRelease(chreNanoappInfo *eventData) {
-    return chreHeapFree(eventData);
-}
-//! struct chreHostEndpointInfo begin
-uint32_t chreHostEndpointInfoWrapperCopiedFromNative(wasm_module_inst_t WasmModuleInst,
-                                                     const chreHostEndpointInfo *eventData) {
-    uint32_t structDataOffset = 0;
-    chreHostEndpointInfoWrapper *structData = NULL;
-    if(!(structDataOffset = wasm_runtime_module_malloc(WasmModuleInst, sizeof(chreHostEndpointInfoWrapper),
-                                                       reinterpret_cast<void**>(&structData)))) {
-        goto fail1;
-    }
-    memcpy(structData, eventData, sizeof(chreHostEndpointInfoWrapper));
-    return structDataOffset;
-fail1:
-    LOGE("");
-    return 0;
-}
-
-chreHostEndpointInfo *chreHostEndpointInfoCopiedFromWASM(wasm_module_inst_t WasmModuleInst,
-                                                         uint32_t eventDataForWASM) {
-    chreHostEndpointInfo *eventData = NULL;
-    chreHostEndpointInfoWrapper *structData = NULL;
-    if (!(structData = reinterpret_cast<chreHostEndpointInfoWrapper*>(
-                        wasm_runtime_addr_app_to_native(WasmModuleInst, eventDataForWASM)))) {
-        goto fail1;
-    }
-    if(!(eventData = reinterpret_cast<chreHostEndpointInfo*>(
-                                            chreHeapAlloc(sizeof(chreHostEndpointInfo))))) {
-        goto fail1;
-    }
-    memcpy(eventData, structData, sizeof(chreHostEndpointInfo));
-    return eventData;
-fail1:
-    LOGE("");
-    return nullptr;   
-}
-
-void chreHostEndpointInfoWrapperRelease(wasm_module_inst_t WasmModuleInst,
-                                        uint32_t eventDataForWASM) {
-    wasm_runtime_module_free(WasmModuleInst, eventDataForWASM);
-}
-
-void chreHostEndpointInfoRelease(chreHostEndpointInfo *eventData) {
-    chreHeapFree(eventData);
-}
+//! struct chreHostEndpointInfo start
+STRUCTURE_WITH_NO_POINTER_FUNCTIONS_IMPLEMENT(chreHostEndpointInfo);
 
 /**
  * CHRE API Wrapper
 */
 
-
+/**
+ * @todo Change the disign
+ * @todo Serialization
+*/
 bool chreSendEventWrapper(wasm_exec_env_t exec_env, uint16_t eventType,
                           uint32_t eventDataForWASM,
                           uint32_t funcOffset,
@@ -225,7 +173,7 @@ bool chreSendEventWrapper(wasm_exec_env_t exec_env, uint16_t eventType,
     return chreSendEvent(eventType, eventData, freeFunc, targetInstanceId);
 }
 
-void chreMessageFreeFunctionWrapper(void *message, size_t messageSize){
+static void chreMessageFreeFunctionWrapper(void *message, size_t messageSize){
     UNUSED_VAR(messageSize);
     chreHeapFree(message);
 }
@@ -286,13 +234,13 @@ fail1:
 }
 
 bool chreGetNanoappInfoByAppIdWrapper(wasm_exec_env_t exec_env, uint64_t appId,
-                                      chreNanoappInfoWrapper *info) {
+                                      chreNanoappInfo *info) {
     return chreGetNanoappInfoByAppId(appId, static_cast<chreNanoappInfo*>(info));
 }
 
 bool chreGetNanoappInfoByInstanceIdWrapper(wasm_exec_env_t exec_env, uint32_t instanceId,
-                                           chreNanoappInfoWrapper *info) {
-    return chreGetNanoappInfoByInstanceId(instanceId, static_cast<chreNanoappInfo*>(info));
+                                           chreNanoappInfo *info) {
+    return chreGetNanoappInfoByInstanceId(instanceId, info);
 }
 
 void chreConfigureNanoappInfoEventsWrapper(wasm_exec_env_t exec_env, bool enable) {
@@ -318,14 +266,14 @@ bool chreConfigureHostEndpointNotificationsWrapper(wasm_exec_env_t exec_env, uin
     return chreConfigureHostEndpointNotifications(hostEndpointId, enable);
 }
 
-bool chrePublishRpcServicesWrapper(wasm_exec_env_t exec_env, chreNanoappRpcServiceWrapper *services,
+bool chrePublishRpcServicesWrapper(wasm_exec_env_t exec_env, chreNanoappRpcService *services,
                                     size_t numServices) {
-    return chrePublishRpcServices(static_cast<chreNanoappRpcService*>(services), numServices);
+    return chrePublishRpcServices(services, numServices);
 }
 
 bool chreGetHostEndpointInfoWrapper(wasm_exec_env_t exec_env, uint16_t hostEndpointId,
-                                    chreHostEndpointInfoWrapper *info) {
-    return chreGetHostEndpointInfo(hostEndpointId, static_cast<chreHostEndpointInfo *>(info));
+                                    chreHostEndpointInfo *info) {
+    return chreGetHostEndpointInfo(hostEndpointId, info);
 }
 #ifdef __cplusplus
 }

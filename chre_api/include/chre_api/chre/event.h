@@ -898,5 +898,7 @@ bool chreGetHostEndpointInfo(uint16_t hostEndpointId,
 }
 #endif
 
+#include "chre/platform/shared/chre_api_wrapper/event_assert.h"
+
 #endif  /* _CHRE_EVENT_H_ */
 
