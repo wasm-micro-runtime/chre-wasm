@@ -53,6 +53,10 @@
         totalSize += wasm_event->header.readingCount                                        \
                             * (sizeof(struct type) - sizeof(struct chreSensorDataHeader));  \
                                                                                             \
+        if(!wasm_runtime_validate_app_addr(WasmModuleInst, eventDataForWASM, totalSize)) {  \
+            LOGE("The wasm memory to be copied is out of the boundary");                    \
+            goto fail0;                                                                     \
+        }                                                                                   \
         pointer_event = reinterpret_cast<struct type*>(chreHeapAlloc(totalSize));           \
         if(!pointer_event) {                                                                \
             LOGE("Allocate memory for struct chreGnssDataEvent in Native failed!");         \
