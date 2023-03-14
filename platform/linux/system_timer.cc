@@ -31,8 +31,8 @@ namespace {
 constexpr uint64_t kOneSecondInNanoseconds = 1000000000;
 
 void NanosecondsToTimespec(uint64_t ns, struct timespec *ts) {
-  ts->tv_sec = ns / kOneSecondInNanoseconds;
-  ts->tv_nsec = ns % kOneSecondInNanoseconds;
+  ts->tv_sec = static_cast<long>(ns / kOneSecondInNanoseconds);
+  ts->tv_nsec = static_cast<long>(ns % kOneSecondInNanoseconds);
 }
 
 }  // anonymous namespace
