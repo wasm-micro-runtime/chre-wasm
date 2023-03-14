@@ -51,7 +51,7 @@ NATIVE_TO_WASM_FUNCTION_DECLARATION(chreMessageFromHostData) {
         pointer_event_message = nowBuffer;
         nowBuffer += native_event->messageSize;
         memcpy(pointer_event_message, native_event->message, native_event->messageSize);
-        pointer_event->message = pointer_event_message;
+        pointer_event->message = reinterpret_cast<void*>(offset_event_message);
     }
 
     if (nowBuffer + totalSize != dataBuffer) {
