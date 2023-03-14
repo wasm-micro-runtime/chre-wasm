@@ -465,4 +465,6 @@ struct chreSensorUint64Data {
 }
 #endif
 
+#include "chre/platform/shared/chre_api_wrapper/sensor_types_assert.h"
+
 #endif  /* _CHRE_SENSOR_TYPES_H_ */
