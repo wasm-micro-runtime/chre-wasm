@@ -1108,4 +1108,6 @@ bool chreSensorFlushAsync(uint32_t sensorHandle, const void *cookie);
 }
 #endif
 
+#include "chre/platform/shared/chre_api_wrapper/sensor_assert.h"
+
 #endif  /* _CHRE_SENSOR_H_ */
