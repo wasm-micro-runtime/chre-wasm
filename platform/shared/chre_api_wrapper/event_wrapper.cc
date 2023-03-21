@@ -2,7 +2,6 @@
 #include "chre/util/system/napp_permissions.h"
 #include "chre/platform/shared/chre_api_wrapper/event_wrapper.h"
 #include "chre/platform/shared/chre_api_wrapper/event_transform.h"
-#include "chre/platform/shared/chre_api_wrapper/event_wrapper.h"
 #include "chre/platform/log.h"
 #include "chre/re.h"
 #include "memory.h"
@@ -136,6 +135,30 @@ STRUCTURE_WITH_NO_POINTER_FUNCTIONS_IMPLEMENT(chreNanoappInfo);
 
 //! struct chreHostEndpointInfo start
 STRUCTURE_WITH_NO_POINTER_FUNCTIONS_IMPLEMENT(chreHostEndpointInfo);
+
+//! cookie event begin
+NATIVE_TO_WASM_FUNCTION_DECLARATION(cookie) {
+    if(!WasmModuleInst) {
+        return 0;
+    }
+    return wasm_runtime_addr_native_to_app(WasmModuleInst, nativeData);
+}
+
+WASM_TO_NATIVE_FUNCTION_DECLARATION(cookie) {
+    if(!WasmModuleInst) {
+        return 0;
+    }
+    return wasm_runtime_addr_app_to_natie(WasmModuleInst, eventDataForWASM);
+}
+FREE_WASM_EVENT_FUNCTION_DECLARATION(chreMessageFromHostData) {
+    UNUSED_VAR(WasmModuleInst);
+    UNUSED_VAR(nativeData);
+}
+
+FREE_NATIVE_EVENT_FUNCTION_DECLARATION(chreMessageFromHostData) {
+    UNUSED_VAR(WasmModuleInst);
+    UNUSED_VAR(eventDataForWASM);
+}
 
 /**
  * CHRE API Wrapper
