@@ -588,4 +588,6 @@ static inline int64_t chreWwanUnpackNrNci(
 }
 #endif
 
+#include "chre/platform/shared/chre_api_wrapper/wwan_assert.h"
+
 #endif  /* _CHRE_WWAN_H_ */
