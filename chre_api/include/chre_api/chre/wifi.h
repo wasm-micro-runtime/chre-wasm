@@ -1310,4 +1310,6 @@ bool chreWifiNanRequestRangingAsync(const struct chreWifiNanRangingParams *param
 }
 #endif
 
+#include "chre/platform/shared/chre_api_wrapper/wifi_assert.h"
+
 #endif  /* _CHRE_WIFI_H_ */
