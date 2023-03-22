@@ -45,10 +45,13 @@ bool chreAudioConfigureSourceWrapper(wasm_exec_env_t exec_env,
                                      uint64_t deliveryInterval) {
     return chreAudioConfigureSource(handle, enable, bufferDuration, deliveryInterval);
 }
-
+/**
+ * @todo chreAudioGetStatus is not supported
+*/
 bool chreAudioGetStatusWrapper(wasm_exec_env_t exec_env, uint32_t handle,
                                chreAudioSourceStatus *status){
-    return chreAudioGetStatus(handle, status);
+    // return chreAudioGetStatus(handle, status);
+    return false;
 }
 
 //! struct chreAudioSourceStatusEvent begin
