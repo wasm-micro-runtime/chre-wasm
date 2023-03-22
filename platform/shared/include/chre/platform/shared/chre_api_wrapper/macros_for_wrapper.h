@@ -5,7 +5,7 @@
         uint32_t type##Dup2WASM(wasm_module_inst_t WasmModuleInst,  const void *nativeData)
 
 #define WASM_TO_NATIVE_FUNCTION_DECLARATION(type) \
-        type* type##Dup2Native(wasm_module_inst_t WasmModuleInst, \
+        void* type##Dup2Native(wasm_module_inst_t WasmModuleInst, \
                                                          uint32_t eventDataForWASM)
 #define FREE_WASM_EVENT_FUNCTION_DECLARATION(type) \
         void type##WASMRelease(wasm_module_inst_t WasmModuleInst,    \
@@ -47,6 +47,21 @@
             WASM_TO_NATIVE_FUNCTION_DECLARATION(type);  \
             FREE_WASM_EVENT_FUNCTION_DECLARATION(type); \
             FREE_NATIVE_EVENT_FUNCTION_DECLARATION(type);
+
+#define NATIVE_TO_WASM_FUNCTION_POINTER(type) \
+        type##Dup2WASM
+#define WASM_TO_NATIVE_FUNCTION_POINTER(type) \
+        type##Dup2Native
+#define FREE_WASM_EVENT_FUNCTION_POINTER(type) \
+        type##WASMRelease
+#define FREE_NATIVE_EVENT_FUNCTION_POINTER(type) \
+        type##NativeRelease
+
+#define CONVERSION_FUNCTION_POINTERS(type)              \
+            NATIVE_TO_WASM_FUNCTION_POINTER(type),  \
+            WASM_TO_NATIVE_FUNCTION_POINTER(type),  \
+            FREE_WASM_EVENT_FUNCTION_POINTER(type), \
+            FREE_NATIVE_EVENT_FUNCTION_POINTER(type)
 
 /**
  * @note This is macro is for quickly writing functions of the structure with no pointer, 
