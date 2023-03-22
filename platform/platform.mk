@@ -228,6 +228,7 @@ SIM_SRCS += platform/shared/chre_wrapper.cc
 SIM_SRCS += platform/shared/chre_api_wrapper/audio_wrapper.cc
 SIM_SRCS += platform/shared/chre_api_wrapper/gnss_wrapper.cc
 SIM_SRCS += platform/shared/chre_api_wrapper/sensor_wrapper.cc
+SIM_SRCS += platform/shared/chre_api_wrapper/sensor_types_wrapper.cc
 SIM_SRCS += platform/shared/chre_api_wrapper/wifi_wrapper.cc
 SIM_SRCS += platform/shared/chre_api_wrapper/ble_wrapper.cc
 SIM_SRCS += platform/shared/chre_api_wrapper/nanoapp_support_wasm_wrapper.cc
