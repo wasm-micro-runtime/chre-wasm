@@ -36,6 +36,12 @@ CONVERSION_FUNCTIONS_DECLARATION(chreNanoappInfo);
 //! struct chreHostEndpointInfo Begin
 CONVERSION_FUNCTIONS_DECLARATION(chreHostEndpointInfo);
 
+//! struct chreHostEndpointNotification
+CONVERSION_FUNCTIONS_DECLARATION(chreHostEndpointNotification);
+
+//! cookie event
+CONVERSION_FUNCTIONS_DECLARATION(cookie);
+
 /**
  * CHRE API Wrapper
 */

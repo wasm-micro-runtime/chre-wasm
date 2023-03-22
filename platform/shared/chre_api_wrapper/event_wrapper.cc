@@ -8,6 +8,8 @@
 #include <stddef.h>
 #include <stdint.h>
 
+#include <map>
+
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -136,28 +138,29 @@ STRUCTURE_WITH_NO_POINTER_FUNCTIONS_IMPLEMENT(chreNanoappInfo);
 //! struct chreHostEndpointInfo start
 STRUCTURE_WITH_NO_POINTER_FUNCTIONS_IMPLEMENT(chreHostEndpointInfo);
 
+//! struct chreHostEndpointNotification
+STRUCTURE_WITH_NO_POINTER_FUNCTIONS_IMPLEMENT(chreHostEndpointNotification);
 //! cookie event begin
 NATIVE_TO_WASM_FUNCTION_DECLARATION(cookie) {
     if(!WasmModuleInst) {
         return 0;
     }
-    return wasm_runtime_addr_native_to_app(WasmModuleInst, nativeData);
+    return wasm_runtime_addr_native_to_app(WasmModuleInst, const_cast<void*>(nativeData));
 }
 
 WASM_TO_NATIVE_FUNCTION_DECLARATION(cookie) {
     if(!WasmModuleInst) {
         return 0;
     }
-    return wasm_runtime_addr_app_to_natie(WasmModuleInst, eventDataForWASM);
+    return wasm_runtime_addr_app_to_native(WasmModuleInst, eventDataForWASM);
 }
-FREE_WASM_EVENT_FUNCTION_DECLARATION(chreMessageFromHostData) {
-    UNUSED_VAR(WasmModuleInst);
-    UNUSED_VAR(nativeData);
-}
-
-FREE_NATIVE_EVENT_FUNCTION_DECLARATION(chreMessageFromHostData) {
+FREE_WASM_EVENT_FUNCTION_DECLARATION(cookie) {
     UNUSED_VAR(WasmModuleInst);
     UNUSED_VAR(eventDataForWASM);
+}
+
+FREE_NATIVE_EVENT_FUNCTION_DECLARATION(cookie) {
+    UNUSED_VAR(nativeData);
 }
 
 /**
@@ -165,40 +168,58 @@ FREE_NATIVE_EVENT_FUNCTION_DECLARATION(chreMessageFromHostData) {
 */
 
 /**
- * @todo Change the disign
  * @todo Serialization
 */
+typedef struct mapInternalEventData{
+    wasm_exec_env_t execEnv;
+    const convertFunctions *functions;
+    uint32_t originFuncOffset;
+    uint32_t originDataOffset;
+} mapInternalEventData;
+
+static std::map<void*, mapInternalEventData> eventDataMap;
+
+void freeFunc(uint16_t eventType, void *eventData) {
+    auto item = eventDataMap.find(eventData);
+    wasm_module_inst_t WasmModuleInst = NULL;
+    uint32_t argv[2];
+    if (item == eventDataMap.end()) {
+        return;
+    }
+    argv[0] = eventType;
+    argv[1] = item->second.originDataOffset;
+    WasmModuleInst = wasm_runtime_get_module_inst(item->second.execEnv);
+    if(item->second.originFuncOffset)
+        wasm_runtime_call_indirect(item->second.execEnv,  item->second.originFuncOffset, 2, argv);
+    item->second.functions->nativeRelease(eventData);
+    eventDataMap.erase(item);
+}
+
 bool chreSendEventWrapper(wasm_exec_env_t exec_env, uint16_t eventType,
                           uint32_t eventDataForWASM,
                           uint32_t funcOffset,
                           uint32_t targetInstanceId) {
     chreEventCompleteFunction* freeFunc = nullptr;
     void *eventData = nullptr;
-    uint32_t argv[1];
-    wasm_module_inst_t WASMModuleInst = NULL;
-    if(!(WASMModuleInst = wasm_runtime_get_module_inst(exec_env))) {
+    wasm_module_inst_t WasmModuleInst = NULL;
+    if(!(WasmModuleInst = wasm_runtime_get_module_inst(exec_env))) {
         return false;
     }
+    //get function pointers
+    const convertFunctions *funcs = getConvertFunctions(eventType);
     //get new native data
     //All event data is copied here
-    if (eventDataForWASM && !(eventData = copyEventFromWASMToNative(WASMModuleInst,
-                                                                    eventType,
-                                                                    eventDataForWASM))) {
+    if (eventDataForWASM && !(eventData = funcs->wasm2Native(WasmModuleInst, eventDataForWASM))) {
         return false;
     }
-    //get free callback function
-    if(funcOffset) {
-        freeFunc = getCompleteFunction(eventType);
-        //free Wasm data
-        argv[0] = eventDataForWASM;
-        wasm_runtime_call_indirect(exec_env,  funcOffset, 1, argv);
-    }
+    //mapping data
+    eventDataMap[eventData] = {
+        exec_env,
+        funcs,
+        funcOffset,
+        eventDataForWASM
+    };
     return chreSendEvent(eventType, eventData, freeFunc, targetInstanceId);
-}
-
-static void chreMessageFreeFunctionWrapper(void *message, size_t messageSize){
-    UNUSED_VAR(messageSize);
-    chreHeapFree(message);
 }
 
 bool chreSendMessageToHostWrapper(wasm_exec_env_t exec_env, uint32_t messageForWASM,
@@ -218,42 +239,45 @@ bool chreSendMessageToHostEndpointWrapper(wasm_exec_env_t exec_env, uint32_t mes
 }
 
 
+typedef struct mapInternalMessageData{
+    wasm_exec_env_t execEnv;
+    uint32_t originFuncOffset;
+} mapInternalMessageData;
+
+static std::map<void*, mapInternalMessageData> messageDataMap;
+
+static void messageFreeFunc(void *message, size_t messageSize) {
+    auto item = messageDataMap.find(message);
+    uint32_t offset = 0;
+    uint32_t argv[2];
+    wasm_module_inst_t WasmModuleInst = NULL;
+    if(messageDataMap.end() == item) {
+        return;
+    }
+    WasmModuleInst = wasm_runtime_get_module_inst(item->second.execEnv);
+    offset = wasm_runtime_addr_native_to_app(WasmModuleInst, message);
+    argv[0] = offset;
+    argv[1] = messageSize;
+    wasm_runtime_call_indirect(item->second.execEnv, item->second.originFuncOffset, 2, argv);
+    messageDataMap.erase(item);
+}
+
 bool chreSendMessageWithPermissionsWrapper(wasm_exec_env_t exec_env, uint32_t messageForWASM, uint32_t messageSize,
                                             uint32_t messageType, uint16_t hostEndpoint,
                                             uint32_t messagePermissions,
                                             uint32_t funcOffset) {
-    //native
-    void *message = NULL;
-    //wasm
-    void *messageData = NULL;
-    uint32_t argv[2];
     wasm_module_inst_t WasmModuleInst = NULL;
-    if (!(WasmModuleInst = wasm_runtime_get_module_inst(exec_env))) {
-        goto fail1;
+    if(!exec_env || !(WasmModuleInst = wasm_runtime_get_module_inst(exec_env))) {
+        return false;
     }
-    if (!(messageData = wasm_runtime_addr_app_to_native(WasmModuleInst,
-                                                        messageForWASM))) {
-        goto fail1;
-    }
-    //allocate new native data space
-    if (messageData && !(message = chreHeapAlloc(messageSize))) {
-        goto fail1;
-    }
-    //copy
-    if(messageData) {
-        memcpy(message, messageData, messageSize);
-    }
-    //get free callback function
-    if(funcOffset) {
-        argv[0] = messageForWASM;
-        argv[1] = messageSize;
-        wasm_runtime_call_indirect(exec_env,  funcOffset, 2, argv);
-    }
+    // mapping data
+    void *message = wasm_runtime_addr_app_to_native(WasmModuleInst, messageForWASM);
+    messageDataMap[message] = {
+        exec_env,
+        funcOffset
+    };
     return chreSendMessageWithPermissions(message, messageSize, messageType, hostEndpoint,
-                                          messagePermissions, chreMessageFreeFunctionWrapper);
-fail1:
-    LOGE("");
-    return false;
+                                          messagePermissions, messageFreeFunc);
 }
 
 bool chreGetNanoappInfoByAppIdWrapper(wasm_exec_env_t exec_env, uint64_t appId,

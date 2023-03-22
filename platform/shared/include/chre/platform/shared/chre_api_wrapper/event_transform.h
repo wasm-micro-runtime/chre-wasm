@@ -9,18 +9,15 @@
 extern "C" {
 #endif
 
-uint32_t copyEventFromNativeToWASM(wasm_module_inst_t WasmModuleInst, 
-                        uint16_t eventType, const void *eventData);
+typedef struct convertFunctions {
+    uint32_t eventType;
+    uint32_t (*native2Wasm)(wasm_module_inst_t ,  const void *);
+    void* (*wasm2Native)(wasm_module_inst_t , uint32_t);
+    void (*wasmRelease)(wasm_module_inst_t, uint32_t);
+    void (*nativeRelease)(void *);
+}convertFunctions;
 
-void* copyEventFromWASMToNative(wasm_module_inst_t WasmModuleInst, 
-                        uint16_t eventType, uint32_t eventDataForWASM);
-
-void freeEventFromWASM(wasm_module_inst_t WasmModuleInst, 
-                        uint16_t eventType, uint32_t eventDataForWASM);
-
-void freeEventFromNative(uint16_t eventType, void *eventData);
-
-chreEventCompleteFunction* getCompleteFunction(uint32_t eventType);
+const convertFunctions* getConvertFunctions(const uint32_t type);
 #ifdef __cplusplus
 }
 #endif
