@@ -29,6 +29,7 @@
 #include "bh_platform.h"
 #include "bh_read_file.h"
 #include "chre/platform/shared/chre_wrapper.h"
+#include "chre/platform/shared/chre_api_wrapper/wrapper_data_map.h"
 
 namespace chre {
 
@@ -61,12 +62,13 @@ bool PlatformNanoapp::start() {
 
 void PlatformNanoapp::handleEvent(uint32_t senderInstanceId, uint16_t eventType,
                                   const void *eventData) {
-  uint32 eventPtrForWASM = 0;
+  uint32 eventOffset = 0;
   uint32 argv[4];
+  const convertFunctions *funcs = nullptr;
   if (mIsWASM) {
-    eventPtrForWASM = copyEventFromNativeToWASM(mWASMHandle.WASMModuleInstance,
-                                                eventType, eventData);
-    if (0 == eventPtrForWASM) {
+    funcs = getConvertFunctions(eventType);
+    eventOffset = funcs->native2Wasm(mWASMHandle.WASMModuleInstance, eventData);
+    if (0 == eventOffset) {
       LOGE("Allocate Memory for Wasm failed! "
         "Nanoapp name: %s Nanoapp id: 0x%016" PRIx64 ") "
         "Event type: 0x%016" PRIx64 ") "
@@ -77,7 +79,7 @@ void PlatformNanoapp::handleEvent(uint32_t senderInstanceId, uint16_t eventType,
     }
     argv[0] = senderInstanceId;
     argv[1] = eventType;
-    argv[2] = eventPtrForWASM;
+    argv[2] = eventOffset;
     if (!wasm_runtime_call_wasm(mWASMHandle.ExecEnv, mWASMHandle.nanoappHandleEventFromWASM, 3, argv)) {
       LOGE("Call nanoappHandleEventFromWASM failed! "
         "Nanoapp name: %s Nanoapp id: 0x%016" PRIx64 ") "
@@ -87,7 +89,7 @@ void PlatformNanoapp::handleEvent(uint32_t senderInstanceId, uint16_t eventType,
         );
       LOGE("Wasm world Error Info: %s", wasm_runtime_get_exception(mWASMHandle.WASMModuleInstance));
     }
-    freeEventFromWASM(mWASMHandle.WASMModuleInstance, eventType, eventPtrForWASM);
+    funcs->wasmRelease(mWASMHandle.WASMModuleInstance, eventOffset);
   } else {
     mAppInfo->entryPoints.handleEvent(senderInstanceId, eventType, eventData);
   }
@@ -108,6 +110,8 @@ void PlatformNanoapp::end() {
   else {
     mAppInfo->entryPoints.end();
   }
+  // delete the WASM Module Instance map
+  delModuleInstanceMap(mWASMHandle.WASMModuleInstance);
   closeNanoapp();
 }
 
