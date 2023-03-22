@@ -1,6 +1,6 @@
 # Copyright (C) 2019 Intel Corporation.  All rights reserved.
 # SPDX-License-Identifier:  Apache-2.0 WITH LLVM-exception
-CONFIG_ARCH_X86_64 := y
+CONFIG_ARCH_X86 := y
 CONFIG_INTERPRETERS_WAMR_CLASSIC := y
 CONFIG_INTERPRETERS_WAMR_LIBC_BUILTIN := y
 CONFIG_INTERPRETERS_WAMR_LIBC_WASI := y
