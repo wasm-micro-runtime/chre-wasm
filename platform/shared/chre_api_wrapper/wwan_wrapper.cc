@@ -145,6 +145,15 @@ fail0:
 }
 
 
+FREE_WASM_EVENT_FUNCTION_DECLARATION(chreWwanCellInfoResult){
+    if(eventDataForWASM)
+        wasm_runtime_module_free(WasmModuleInst, eventDataForWASM);
+}
+
+FREE_NATIVE_EVENT_FUNCTION_DECLARATION(chreWwanCellInfoResult){
+    chreHeapFree(nativeData);
+}
+
 uint32_t chreWwanGetCapabilitiesWrapper(wasm_exec_env_t exec_env) {
     return  chreWwanGetCapabilities();
 }
