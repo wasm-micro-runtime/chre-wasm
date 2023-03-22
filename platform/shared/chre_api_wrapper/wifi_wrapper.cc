@@ -523,8 +523,12 @@ uint32_t chreWifiGetCapabilitiesWrapper(wasm_exec_env_t exec_env) {
     return chreWifiGetCapabilities();
 }
 
+/**
+ * @todo chreWifiNanGetCapabilities is not supported
+*/
 bool chreWifiNanGetCapabilitiesWrapper(wasm_exec_env_t exec_env, struct chreWifiNanCapabilities *capabilities) {
-    return chreWifiNanGetCapabilities(capabilities);
+    // return chreWifiNanGetCapabilities(capabilities);
+    return false;
 }
 
 bool chreWifiConfigureScanMonitorAsyncWrapper(wasm_exec_env_t exec_env, bool enable, const void *cookie) {
