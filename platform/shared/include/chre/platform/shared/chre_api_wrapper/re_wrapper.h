@@ -13,29 +13,27 @@ extern "C" {
 namespace {
     typedef char *_va_list; 
 }
-uint64_t chreGetAppIdWapper(wasm_exec_env_t exec_env);
+uint64_t chreGetAppIdWrapper(wasm_exec_env_t exec_env);
 
-uint32_t chreGetInstanceIdWapper(wasm_exec_env_t exec_env);
-/**
- * @todo complete it
-*/
-void chreLogWapper(wasm_exec_env_t exec_env, enum chreLogLevel level, const char *formatStr, _va_list va_args);
+uint32_t chreGetInstanceIdWrapper(wasm_exec_env_t exec_env);
 
-uint64_t chreGetTimeWapper(wasm_exec_env_t exec_env);
+void chreLogWrapper(wasm_exec_env_t exec_env, enum chreLogLevel level, const char *formatStr, const char* data);
 
-int64_t chreGetEstimatedHostTimeOffsetWapper(wasm_exec_env_t exec_env);
+uint64_t chreGetTimeWrapper(wasm_exec_env_t exec_env);
 
-uint32_t chreTimerSetWapper(wasm_exec_env_t exec_env, uint64_t duration, const void *cookie, bool oneShot);
+int64_t chreGetEstimatedHostTimeOffsetWrapper(wasm_exec_env_t exec_env);
 
-bool chreTimerCancelWapper(wasm_exec_env_t exec_env, uint32_t timerId);
+uint32_t chreTimerSetWrapper(wasm_exec_env_t exec_env, uint64_t duration, const void *cookie, bool oneShot);
 
-void chreAbortWapper(wasm_exec_env_t exec_env, uint32_t abortCode);
+bool chreTimerCancelWrapper(wasm_exec_env_t exec_env, uint32_t timerId);
 
-uint32_t chreHeapAllocWapper(wasm_exec_env_t exec_env, uint32_t bytes);
+void chreAbortWrapper(wasm_exec_env_t exec_env, uint32_t abortCode);
 
-void chreHeapFreeWapper(wasm_exec_env_t exec_env, uint32_t ptr);
+uint32_t chreHeapAllocWrapper(wasm_exec_env_t exec_env, uint32_t bytes);
 
-void chreDebugDumpLogWapper(wasm_exec_env_t exec_env, const char *formatStr, _va_list va_args);
+void chreHeapFreeWrapper(wasm_exec_env_t exec_env, uint32_t ptr);
+
+void chreDebugDumpLogWrapper(wasm_exec_env_t exec_env, const char *formatStr, const char* data);
 
 #ifdef __cplusplus
 }

@@ -67,16 +67,23 @@ void PlatformNanoapp::handleEvent(uint32_t senderInstanceId, uint16_t eventType,
   const convertFunctions *funcs = nullptr;
   if (mIsWASM) {
     funcs = getConvertFunctions(eventType);
-    eventOffset = funcs->native2Wasm(mWASMHandle.WASMModuleInstance, eventData);
-    if (0 == eventOffset) {
-      LOGE("Allocate Memory for Wasm failed! "
-        "Nanoapp name: %s Nanoapp id: 0x%016" PRIx64 ") "
-        "Event type: 0x%016" PRIx64 ") "
-        "Sender instance Id: 0x%016" PRIx64 ")",
-        mAppInfo->name, mAppInfo->appId, eventType, senderInstanceId
-        );
-        return;
+    if(funcs) {
+      eventOffset = funcs->native2Wasm(mWASMHandle.WASMModuleInstance, eventData);
+      if (0 == eventOffset) {
+        LOGE("Allocate Memory for Wasm failed! "
+          "Nanoapp name: %s Nanoapp id: 0x%016" PRIx64 ") "
+          "Event type: 0x%016" PRIx64 ") "
+          "Sender instance Id: 0x%016" PRIx64 ")",
+          mAppInfo->name, mAppInfo->appId, eventType, senderInstanceId
+          );
+          return;
+      }
+    } else {
+      /**
+       * @todo assert error here
+      */
     }
+    
     argv[0] = senderInstanceId;
     argv[1] = eventType;
     argv[2] = eventOffset;
@@ -89,7 +96,14 @@ void PlatformNanoapp::handleEvent(uint32_t senderInstanceId, uint16_t eventType,
         );
       LOGE("Wasm world Error Info: %s", wasm_runtime_get_exception(mWASMHandle.WASMModuleInstance));
     }
-    funcs->wasmRelease(mWASMHandle.WASMModuleInstance, eventOffset);
+    if (funcs) {
+      funcs->wasmRelease(mWASMHandle.WASMModuleInstance, eventOffset);
+    }
+    else {
+      /**
+       * @todo assert error here
+      */
+    }
   } else {
     mAppInfo->entryPoints.handleEvent(senderInstanceId, eventType, eventData);
   }
@@ -187,7 +201,7 @@ bool PlatformNanoappBase::openNanoappFromFile() {
   if(mFilename.size() > 5 && 0 == mFilename.substr(mFilename.size()-5).compare(".wasm")) {
     success = openNanoappFromWASMFile();
   } else {
-    success = openNanoappFromWASMFile();
+    success = openNanoappFromDLLFile();
   }
   return success;
 }
@@ -198,7 +212,7 @@ bool PlatformNanoappBase::openNanoappFromWASMFile(){
   char error_buf[128];
   //Because they will store the return value of the C api, they are set to NULL
   wasm_function_inst_t getNanoappInfo = NULL;
-  chreNslNanoappInfoWrapper* nanoappInfo = NULL;
+  struct chreNslNanoappInfo* tmpMAppInfo = nullptr;
   uint32 argv[2];
   if(!(mWASMHandle.WASMFileBuf = (uint8 *)bh_read_file_to_buffer(mFilename.c_str(), &mWASMHandle.WASMFileSize))) {
     LOGE("Load Wasm file into buffer failed!");
@@ -220,12 +234,12 @@ bool PlatformNanoappBase::openNanoappFromWASMFile(){
   mWASMHandle.nanoappStartFromWASM 
           = wasm_runtime_lookup_function(mWASMHandle.WASMModuleInstance, "nanoappStart", NULL);
   mWASMHandle.nanoappHandleEventFromWASM
-          = wasm_runtime_lookup_function(mWASMHandle.WASMModuleInstance, "nanoappStart", NULL);
-  mWASMHandle.nanoappHandleEventFromWASM
-          = wasm_runtime_lookup_function(mWASMHandle.WASMModuleInstance, "nanoappStart", NULL);
+          = wasm_runtime_lookup_function(mWASMHandle.WASMModuleInstance, "nanoappHandleEvent", NULL);
+  mWASMHandle.nanoappEndFromWASM
+          = wasm_runtime_lookup_function(mWASMHandle.WASMModuleInstance, "nanoappEnd", NULL);
   getNanoappInfo =  wasm_runtime_lookup_function(mWASMHandle.WASMModuleInstance, "getNanoappInfo", NULL);
   if(!mWASMHandle.nanoappStartFromWASM || !mWASMHandle.nanoappHandleEventFromWASM
-      || !mWASMHandle.nanoappHandleEventFromWASM || !getNanoappInfo ) {
+      || !mWASMHandle.nanoappEndFromWASM || !getNanoappInfo ) {
         goto fail4;
   }
   if(!wasm_runtime_call_wasm(mWASMHandle.ExecEnv, getNanoappInfo, 0, argv)){
@@ -233,9 +247,19 @@ bool PlatformNanoappBase::openNanoappFromWASMFile(){
       LOGE("Wasm world Error Info: %s", wasm_runtime_get_exception(mWASMHandle.WASMModuleInstance));
       goto fail4;
   }
-  nanoappInfo = static_cast<chreNslNanoappInfoWrapper*>(
+  tmpMAppInfo = static_cast<struct chreNslNanoappInfo*>(
     wasm_runtime_addr_app_to_native(mWASMHandle.WASMModuleInstance, argv[0]));
-  mAppInfo = createNativeChreNslNanoappInfoFromWrapper(nanoappInfo);
+  //! We mapp wasm offset to native address here directly
+  //! Notice that we can not map it twice
+  if(tmpMAppInfo){
+    tmpMAppInfo->vendor = reinterpret_cast<char*>(
+      wasm_runtime_addr_app_to_native(mWASMHandle.WASMModuleInstance, reinterpret_cast<uint32_t>(tmpMAppInfo->vendor)));
+    tmpMAppInfo->name = reinterpret_cast<char*>(
+      wasm_runtime_addr_app_to_native(mWASMHandle.WASMModuleInstance, reinterpret_cast<uint32_t>(tmpMAppInfo->name)));
+    tmpMAppInfo->appVersionString = reinterpret_cast<char*>(
+      wasm_runtime_addr_app_to_native(mWASMHandle.WASMModuleInstance, reinterpret_cast<uint32_t>(tmpMAppInfo->appVersionString)));
+  }
+  mAppInfo = tmpMAppInfo;
   if (!mAppInfo){
     LOGE("No Space for copying appinfo from Wasm memory");
     goto fail4;

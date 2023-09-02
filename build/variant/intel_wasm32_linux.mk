@@ -33,7 +33,27 @@ else
 $(error only Support building wasm nanoapp now!)
 endif
 include $(CHRE_PREFIX)/build/arch/wasm32.mk
+# Source files.
+CC_SRCS = $(filter %.cc, $(COMMON_SRCS) $(TARGET_VARIANT_SRCS))
+CPP_SRCS = $(filter %.cpp, $(COMMON_SRCS) $(TARGET_VARIANT_SRCS))
+C_SRCS = $(filter %.c, $(COMMON_SRCS) $(TARGET_VARIANT_SRCS))
 
-$(TARGET_NAME):
-	$(TARGET_CC) -o $(OUTPUT_NAME).wasm $(TARGET_CFLAGS) $(COMMON_CFLAGS) $(COMMON_SRCS) $(TARGET_VARIANT_SRCS)
+# Object files.
+CC_OBJS = $(patsubst %.cc, %.o, \
+                           $(CC_SRCS))
+CPP_OBJS = $(patsubst %.cpp, %.o, \
+                            $(CPP_SRCS))
+C_OBJS = $(patsubst %.c, %.o, \
+							$(C_SRCS))
+
+# compile
+C_COMPILE:
+	$(TARGET_CC) -c --target=wasm32-wasi $(TARGET_CFLAGS) $(COMMON_C_FLAGS) $(COMMON_CFLAGS) $(C_SRCS)
+CPP_COMPILE:
+	$(TARGET_CPP_C) -c --target=wasm32-wasi $(TARGET_CFLAGS) $(COMMON_CXX_FLAGS) $(COMMON_CFLAGS) $(CC_SRCS) $(CPP_SRCS)
+
+OBJS = $(CC_OBJS) $(CPP_OBJS) $(C_OBJS)
+$(info $(TARGET_CC))
+$(TARGET_NAME):C_COMPILE CPP_COMPILE
+	$(TARGET_CC) -o $(OUTPUT_NAME).wasm $(WASM32_CFLAGS) $(TARGET_CFLAGS) $(COMMON_CFLAGS) $(CC_OBJS) $(CPP_OBJS) $(C_OBJS)
 endif

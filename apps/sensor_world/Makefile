@@ -37,4 +37,4 @@ COMMON_SRCS += sensor_world.cc
 
 # Makefile Includes ############################################################
 
-include $(CHRE_PREFIX)/build/nanoapp/app.mk
+include $(CHRE_PREFIX)/build/nanoapp/wasm_app.mk

@@ -17,7 +17,6 @@
 #include "chre/core/init.h"
 
 #include "chre/core/event_loop_manager.h"
-#include "chre/core/wamr_embed.h"
 #include "chre/platform/system_time.h"
 #include "chre/platform/version.h"
 #include "chre/util/singleton.h"
@@ -30,13 +29,11 @@ void init() {
   LOGI("CHRE init, version: %s", kChreVersionString);
 
   SystemTime::init();
-  WebAssemblyMicroRuntime::init();
   EventLoopManagerSingleton::init();
 }
 
 void deinit() {
   EventLoopManagerSingleton::deinit();
-  WebAssemblyMicroRuntime::deinit();
   LOGD("CHRE deinit");
 }
 

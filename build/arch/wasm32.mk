@@ -13,8 +13,8 @@ export WASM32_TOOLS_PREFIX=/opt/wasi-sdk/bin/
 
 # wasm32 Tools ####################################################################
 
-TARGET_CC  = $(WASM32_TOOLS_PREFIX)clang++
-
+TARGET_CC  = $(WASM32_TOOLS_PREFIX)/clang
+TARGET_CPP_C = $(WASM32_TOOLS_PREFIX)/clang++
 # wasm Compiler Flags ###########################################################
 
 WASM32_CFLAGS += --target=wasm32-wasi
@@ -31,8 +31,11 @@ WASM32_CFLAGS += -Wl,--export=getnanoappHandleEvent
 WASM32_CFLAGS += -Wl,--export=getNanoappInfo
 WASM32_CFLAGS += -Wl,--allow-undefined
 
+COMMON_CXX_FLAGS += --std=c++17
+COMMON_C_FLAGS += --std=c11
+
 # Add WASM32 compiler flags.
-TARGET_CFLAGS += $(WASM32_CFLAGS)
+#TARGET_CFLAGS += $(WASM32_CFLAGS)
 
 # x86 is purely used for testing, so always include debugging symbols
 TARGET_CFLAGS += -g

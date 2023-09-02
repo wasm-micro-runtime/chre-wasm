@@ -50,17 +50,17 @@ bool chreSendEventWrapper(wasm_exec_env_t exec_env, uint16_t eventType,
                           uint32_t targetInstanceId);
 
 
-bool chreSendMessageToHostWrapper(wasm_exec_env_t exec_env, uint32_t messageForWASM,
+bool chreSendMessageToHostWrapper(wasm_exec_env_t exec_env, void* message,
                                   uint32_t messageSize, uint32_t messageType,
                                   uint32_t funcOffset);
 
 
-bool chreSendMessageToHostEndpointWrapper(wasm_exec_env_t exec_env, uint32_t messageForWASM, uint32_t messageSize,
+bool chreSendMessageToHostEndpointWrapper(wasm_exec_env_t exec_env, void* message, uint32_t messageSize,
                                           uint32_t messageType, uint16_t hostEndpoint,
                                           uint32_t funcOffset);
 
 
-bool chreSendMessageWithPermissionsWrapper(wasm_exec_env_t exec_env, uint32_t messagePointer, uint32_t messageSize,
+bool chreSendMessageWithPermissionsWrapper(wasm_exec_env_t exec_env, void* message, uint32_t messageSize,
                                             uint32_t messageType, uint16_t hostEndpoint,
                                             uint32_t messagePermissions,
                                             uint32_t funcOffset);

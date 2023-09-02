@@ -76,7 +76,7 @@ void makeBleScanRequest() {
     uint32_t reportDelayMs = 0;
     chreBleScanFilter *filter = getBleScanFilter(scanRequestType);
     LOGI("Sending BLE start scan request to PAL with parameters:");
-    LOGI("  mode=%" PRIu8, kScanModes[scanModeIndex]);
+    LOGI("  mode=%" PRIu32, kScanModes[scanModeIndex]);
     LOGI("  reportDelayMs=%" PRIu32, reportDelayMs);
     if (filter != nullptr) {
       LOGI("  rssiThreshold=%" PRIu32, filter->rssiThreshold);
@@ -112,7 +112,7 @@ void makeBleScanRequest() {
 
 void handleAdvertismentEvent(const chreBleAdvertisementEvent *event) {
   for (uint8_t i = 0; i < event->numReports; i++) {
-    LOGI("BLE Report %" PRIu8, i + 1);
+    LOGI("BLE Report %" PRIu32, i + 1);
     LOGI("Scan data:");
     const uint8_t *data = event->reports[i].data;
     for (uint8_t j = 0; j < event->reports[i].dataLength; j++) {

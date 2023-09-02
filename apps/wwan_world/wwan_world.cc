@@ -27,7 +27,8 @@
 namespace chre {
 namespace {
 #endif  // CHRE_NANOAPP_INTERNAL
-
+using chre::Nanoseconds;
+using chre::Seconds;
 //! A fake/unused cookie to pass into the cell info request.
 const uint32_t kCellInfoCookie = 0x1337;
 

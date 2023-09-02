@@ -46,7 +46,7 @@ NATIVE_TO_WASM_FUNCTION_DECLARATION(chreBleAdvertisementEvent){
     //copy first level
     offset_event = dataOffset;
     pointer_event = reinterpret_cast<struct chreBleAdvertisementEvent*>(nowBuffer);
-    nowBuffer += sizeof(struct chreBleAdvertisementEvent*);
+    nowBuffer += sizeof(struct chreBleAdvertisementEvent);
     memcpy(pointer_event, nativeEvent, offsetof(struct chreBleAdvertisementEvent, reports));
     
     //copy second level
@@ -196,6 +196,9 @@ uint32_t chreBleGetFilterCapabilitiesWrapper(wasm_exec_env_t exec_env){
 bool chreBleStartScanAsyncWrapper(wasm_exec_env_t exec_env, enum chreBleScanMode mode,
                                   uint32_t reportDelayMs, const struct chreBleScanFilter *filter) {
     struct chreBleScanFilter tmp;
+    if (!filter) {
+        return chreBleStartScanAsync(mode, reportDelayMs, nullptr);
+    }
     tmp.rssiThreshold = filter->rssiThreshold;
     tmp.scanFilterCount = filter->scanFilterCount;
     wasm_module_inst_t WasmModuleInst = wasm_runtime_get_module_inst(exec_env);

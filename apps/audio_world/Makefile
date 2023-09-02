@@ -21,7 +21,8 @@ NANOAPP_ID = 0x012345678900000c
 NANOAPP_VERSION = 0x00000001
 
 NANOAPP_NAME_STRING = \"Audio\ World\"
-
+NANOAPP_IS_SYSTEM_NANOAPP = 1
+NANOAPP_VENDOR_STRING = \"Intel\"
 # Enable CHRE Overrides ########################################################
 
 CHRE_STD_OVERRIDES_ALLOWED = true

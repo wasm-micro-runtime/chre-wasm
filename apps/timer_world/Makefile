@@ -37,4 +37,4 @@ COMMON_SRCS += timer_world.cc
 
 # Makefile Includes ############################################################
 
-include $(CHRE_PREFIX)/build/nanoapp/app.mk
+include $(CHRE_PREFIX)/build/nanoapp/wasm_app.mk

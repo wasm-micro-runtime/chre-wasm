@@ -12,7 +12,13 @@ endif
 # Nanoapp Configuration ########################################################
 
 NANOAPP_NAME = message_world
+NANOAPP_ID = 0x01234567890000A1
+NANOAPP_VERSION = 0x00000001
 
+# Defines
+COMMON_CFLAGS += -DNANOAPP_MINIMUM_LOG_LEVEL=CHRE_LOG_LEVEL_DEBUG
+
+NANOAPP_NAME_STRING = \"MESSAGE\ World\"
 # Common Compiler Flags ########################################################
 
 COMMON_CFLAGS += -I.
@@ -23,4 +29,4 @@ COMMON_SRCS += message_world.cc
 
 # Makefile Includes ############################################################
 
-include $(CHRE_PREFIX)/build/nanoapp/app.mk
+include $(CHRE_PREFIX)/build/nanoapp/wasm_app.mk

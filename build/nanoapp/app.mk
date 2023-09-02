@@ -94,6 +94,9 @@ endif
 
 # Common Compiler Flags ########################################################
 
+# Add the CHRE API header assertion
+COMMON_CFLAGS += -I$(CHRE_PREFIX)/platform/shared/include
+
 # Add the CHRE API to the include search path.
 COMMON_CFLAGS += -I$(CHRE_PREFIX)/chre_api/include/chre_api
 

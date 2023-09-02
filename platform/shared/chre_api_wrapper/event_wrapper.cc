@@ -222,18 +222,18 @@ bool chreSendEventWrapper(wasm_exec_env_t exec_env, uint16_t eventType,
     return chreSendEvent(eventType, eventData, freeFunc, targetInstanceId);
 }
 
-bool chreSendMessageToHostWrapper(wasm_exec_env_t exec_env, uint32_t messageForWASM,
+bool chreSendMessageToHostWrapper(wasm_exec_env_t exec_env, void* message,
                                   uint32_t messageSize, uint32_t messageType,
                                   uint32_t funcOffset) {
-    return chreSendMessageToHostEndpointWrapper(exec_env, messageForWASM, messageSize, messageType,
+    return chreSendMessageToHostEndpointWrapper(exec_env, message, messageSize, messageType,
                                                  CHRE_HOST_ENDPOINT_BROADCAST, funcOffset);
 }
 
 
-bool chreSendMessageToHostEndpointWrapper(wasm_exec_env_t exec_env, uint32_t messageForWASM, uint32_t messageSize,
+bool chreSendMessageToHostEndpointWrapper(wasm_exec_env_t exec_env, void* message, uint32_t messageSize,
                                           uint32_t messageType, uint16_t hostEndpoint,
                                           uint32_t funcOffset) {
-    return chreSendMessageWithPermissionsWrapper(exec_env, messageForWASM, messageSize, messageType, hostEndpoint,
+    return chreSendMessageWithPermissionsWrapper(exec_env, message, messageSize, messageType, hostEndpoint,
                                                  static_cast<uint32_t>(chre::NanoappPermissions::CHRE_PERMS_NONE),
                                                  funcOffset);
 }
@@ -251,18 +251,23 @@ static void messageFreeFunc(void *message, size_t messageSize) {
     uint32_t offset = 0;
     uint32_t argv[2];
     wasm_module_inst_t WasmModuleInst = NULL;
-    if(messageDataMap.end() == item) {
+    if(messageDataMap.end() == item || !item->second.originFuncOffset) {
         return;
     }
-    WasmModuleInst = wasm_runtime_get_module_inst(item->second.execEnv);
+    if(!(WasmModuleInst = wasm_runtime_get_module_inst(item->second.execEnv))) {
+        LOGE("The Wasm Module Instance is NULL!");
+    }
+
     offset = wasm_runtime_addr_native_to_app(WasmModuleInst, message);
     argv[0] = offset;
     argv[1] = messageSize;
-    wasm_runtime_call_indirect(item->second.execEnv, item->second.originFuncOffset, 2, argv);
+    if(!wasm_runtime_call_indirect(item->second.execEnv, item->second.originFuncOffset, 2, argv)) {
+        LOGE("Calling callback function in WASM for message failed! Error: %s",wasm_runtime_get_exception(WasmModuleInst));
+    }
     messageDataMap.erase(item);
 }
 
-bool chreSendMessageWithPermissionsWrapper(wasm_exec_env_t exec_env, uint32_t messageForWASM, uint32_t messageSize,
+bool chreSendMessageWithPermissionsWrapper(wasm_exec_env_t exec_env, void* message, uint32_t messageSize,
                                             uint32_t messageType, uint16_t hostEndpoint,
                                             uint32_t messagePermissions,
                                             uint32_t funcOffset) {
@@ -270,8 +275,6 @@ bool chreSendMessageWithPermissionsWrapper(wasm_exec_env_t exec_env, uint32_t me
     if(!exec_env || !(WasmModuleInst = wasm_runtime_get_module_inst(exec_env))) {
         return false;
     }
-    // mapping data
-    void *message = wasm_runtime_addr_app_to_native(WasmModuleInst, messageForWASM);
     messageDataMap[message] = {
         exec_env,
         funcOffset

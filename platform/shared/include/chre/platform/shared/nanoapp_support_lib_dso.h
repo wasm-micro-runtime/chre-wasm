@@ -68,6 +68,7 @@ typedef void(chreNanoappEndFunction)(void);
  * by CHRE_NSL_DSO_NANOAPP_INFO_SYMBOL_NAME. When the nanoapp is loaded, dlsym()
  * will be used to locate this symbol to register the nanoapp with the system.
  */
+#pragma pack(4)
 struct chreNslNanoappInfo {
   //! @see CHRE_NSL_NANOAPP_INFO_MAGIC
   uint32_t magic;
@@ -128,6 +129,7 @@ struct chreNslNanoappInfo {
   //! @since minor version 3
   uint32_t appPermissions;
 };
+#pragma pack()
 
 /**
  * Defined as a placeholder to enable future functionality extension.
@@ -143,5 +145,7 @@ bool chreNslDsoGetApi(uint32_t apiId, void **apiHandle);
 #ifdef __cplusplus
 }
 #endif
+
+#include "chre/platform/shared/nanoapp/wasm_nanoapp/nanoapp_support_structure_assert.h"
 
 #endif  // CHRE_PLATFORM_SHARED_NANOAPP_SUPPORT_LIB_DSO_H_

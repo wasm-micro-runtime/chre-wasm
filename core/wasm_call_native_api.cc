@@ -53,6 +53,7 @@ NativeSymbol native_symbols[] = {
     REG_NATIVE_FUNC(chreGetAppId,"()I"),
     REG_NATIVE_FUNC(chreGetInstanceId,"()i"),
     // REG_NATIVE_FUNC(chreLog,"(i$*)"),
+    { "chreLogWrapper", (void*) (chreLogWrapper), "(i**)", NULL },
     REG_NATIVE_FUNC(chreGetTime,"()I"),
     REG_NATIVE_FUNC(chreGetEstimatedHostTimeOffset,"()I"),
     REG_NATIVE_FUNC(chreTimerSet,"(I*i)i"),
@@ -61,11 +62,12 @@ NativeSymbol native_symbols[] = {
     REG_NATIVE_FUNC(chreHeapAlloc,"(i)i"),
     REG_NATIVE_FUNC(chreHeapFree,"(i)"),
     // REG_NATIVE_FUNC(chreDebugDumpLog,"$*"),
+    { "chreLogWrapper", (void*) (chreLogWrapper), "(**)", NULL },
     //! re.h end
    
    //! sensor.h begin
     REG_NATIVE_FUNC(chreSensorFindDefault,"(i*)i"),
-    REG_NATIVE_FUNC(chreSensorFind,"(ii*)"),
+    REG_NATIVE_FUNC(chreSensorFind,"(ii*)i"),
     REG_NATIVE_FUNC(chreGetSensorInfo,"(i*)i"),
     REG_NATIVE_FUNC(chreGetSensorSamplingStatus,"(i*)i"),
     REG_NATIVE_FUNC(chreSensorConfigure,"(iiII)i"),

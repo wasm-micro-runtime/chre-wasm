@@ -1,7 +1,7 @@
 #
 # Hello World Nanoapp Makefile
 #
-
+CHRE_BUILD_VERBOSE = false
 # Environment Checks ###########################################################
 
 ifeq ($(CHRE_PREFIX),)
@@ -21,7 +21,8 @@ NANOAPP_ID = 0x0123456789000001
 NANOAPP_VERSION = 0x00000001
 
 NANOAPP_NAME_STRING = \"Hello\ World\"
-
+NANOAPP_IS_SYSTEM_NANOAPP = 1
+NANOAPP_VENDOR_STRING = \"Intel\"
 # Common Compiler Flags ########################################################
 
 COMMON_CFLAGS += -I.
@@ -32,4 +33,5 @@ COMMON_SRCS += hello_world.cc
 
 # Makefile Includes ############################################################
 
-include $(CHRE_PREFIX)/build/nanoapp/app.mk
+#include $(CHRE_PREFIX)/build/nanoapp/app.mk
+include $(CHRE_PREFIX)/build/nanoapp/wasm_app.mk

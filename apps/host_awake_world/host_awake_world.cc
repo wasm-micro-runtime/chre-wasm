@@ -33,7 +33,7 @@ namespace {
 
 uint8_t gMessageBuffer[] = {0, 1, 2, 3, 4};
 
-uint32_t gMessageTimerHandle;
+uint32_t gMessageTimerHandle = 1;
 
 bool nanoappStart() {
   LOGI("Host awake world start");

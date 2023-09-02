@@ -29,6 +29,7 @@
 #include "chre/platform/log.h"
 #include "chre/platform/system_timer.h"
 #include "chre/util/time.h"
+#include "chre/core/wamr_embed.h"
 
 #include <tclap/CmdLine.h>
 #include <csignal>
@@ -102,6 +103,9 @@ int main(int argc, char **argv) {
 
     // Load any static nanoapps and start the event loop.
     std::thread chreThread([&]() {
+      // init WebAssembly Micro Runtime
+      chre::WebAssemblyMicroRuntime::init();
+
       EventLoopManagerSingleton::get()->lateInit();
 
       // Load static nanoapps unless they are disabled by a command-line flag.
@@ -121,7 +125,7 @@ int main(int argc, char **argv) {
       EventLoopManagerSingleton::get()->getEventLoop().run();
     });
     chreThread.join();
-
+    chre::WebAssemblyMicroRuntime::deinit();
     chre::deinit();
     chre::PlatformLogSingleton::deinit();
   } catch (TCLAP::ExitException) {

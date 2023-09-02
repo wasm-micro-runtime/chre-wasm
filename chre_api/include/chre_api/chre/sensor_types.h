@@ -396,6 +396,7 @@ struct chreSensorThreeAxisData {
  *     CHRE_EVENT_SENSOR_STATIONARY_DETECT_DATA, and
  *     CHRE_EVENT_SENSOR_STEP_DETECT_DATA.
  */
+#pragma pack(4)
 struct chreSensorOccurrenceData {
     struct chreSensorDataHeader header;
     struct chreSensorOccurrenceSampleData {
@@ -405,6 +406,7 @@ struct chreSensorOccurrenceData {
         // is no additional data.
     } readings[1];
 };
+#pragma pack()
 
 /**
  * This is used by CHRE_EVENT_SENSOR_LIGHT_DATA,
@@ -453,6 +455,7 @@ struct chreSensorByteData {
  *
  * This is used by CHRE_EVENT_SENSOR_STEP_COUNTER_DATA.
  */
+#pragma pack(4)
 struct chreSensorUint64Data {
     struct chreSensorDataHeader header;
     struct chreSensorUint64SampleData {
@@ -460,6 +463,7 @@ struct chreSensorUint64Data {
         uint64_t value;
     } readings[1];
 };
+#pragma pack()
 
 #ifdef __cplusplus
 }

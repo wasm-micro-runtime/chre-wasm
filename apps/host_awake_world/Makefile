@@ -21,7 +21,8 @@ NANOAPP_ID = 0x012345678900000d
 NANOAPP_VERSION = 0x00000001
 
 NANOAPP_NAME_STRING = \"Host\ Awake\ World\"
-
+NANOAPP_IS_SYSTEM_NANOAPP = 1
+NANOAPP_VENDOR_STRING = \"Intel\"
 # Common Compiler Flags ########################################################
 
 COMMON_CFLAGS += -I.
@@ -35,4 +36,4 @@ COMMON_SRCS += host_awake_world.cc
 
 # Makefile Includes ############################################################
 
-include $(CHRE_PREFIX)/build/nanoapp/app.mk
+include $(CHRE_PREFIX)/build/nanoapp/wasm_app.mk

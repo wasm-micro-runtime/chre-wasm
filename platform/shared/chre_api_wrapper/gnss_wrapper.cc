@@ -29,7 +29,7 @@ NATIVE_TO_WASM_FUNCTION_DECLARATION(chreGnssDataEvent) {
     totalSize += secondLevelSize;
 
     offset_event = wasm_runtime_module_malloc(WasmModuleInst, totalSize,
-                                              reinterpret_cast<void**>(dataBuffer));
+                                              reinterpret_cast<void**>(&dataBuffer));
     
     if(!offset_event) {
         LOGE("Allocate memory for struct chreGnssDataEvent in Wasm failed!");

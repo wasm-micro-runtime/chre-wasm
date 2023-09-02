@@ -15,7 +15,7 @@ bool chreAudioGetSourceWrapper(wasm_exec_env_t exec_env, uint32_t handle,
     char *name = NULL;
     uint32_t nameLength = 0;
     wasm_module_inst_t WasmModuleInst = NULL;
-    bool success = (WasmModuleInst = wasm_runtime_get_module_inst(exec_env))
+    bool success = (NULL!=exec_env)&&(WasmModuleInst = wasm_runtime_get_module_inst(exec_env))
                     && chreAudioGetSource(handle, audioSource);
     if (success) {
         // try to find a existed mapping name

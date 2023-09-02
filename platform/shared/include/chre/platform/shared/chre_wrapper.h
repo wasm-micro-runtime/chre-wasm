@@ -14,7 +14,6 @@
 #include "chre/platform/shared/chre_api_wrapper/version_wrapper.h"
 #include "chre/platform/shared/chre_api_wrapper/wifi_wrapper.h"
 #include "chre/platform/shared/chre_api_wrapper/wwan_wrapper.h"
-#include "chre/platform/shared/chre_api_wrapper/nanoapp_support_wasm_wrapper.h"
 #include "chre/platform/shared/chre_api_wrapper/event_transform.h"
 #include "wasm_export.h"
 

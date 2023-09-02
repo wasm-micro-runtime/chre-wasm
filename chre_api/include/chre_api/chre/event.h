@@ -518,6 +518,7 @@ struct chreHostEndpointInfo {
  * at the messaging endpoint layers (Android app and/or CHRE nanoapp). NanoappRpcService
  * contains the informational metadata to be consumed by the RPC interface layer.
  */
+#pragma pack(4)
 struct chreNanoappRpcService {
     /**
      * The unique 64-bit ID of an RPC service exposed by a nanoapp. Note that
@@ -534,7 +535,7 @@ struct chreNanoappRpcService {
      */
     uint32_t version;
 };
-
+#pragma pack()
 /**
  * Callback which frees data associated with an event.
  *
