@@ -33,7 +33,6 @@ namespace {
 bool nanoappStart() {
   chreLog(CHRE_LOG_INFO, "Hello, world from version 0x%08" PRIx32,
           chreGetVersion());
-  chreSendEvent(xxxx);
   return true;
 }
 

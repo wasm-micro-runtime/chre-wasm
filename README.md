@@ -16,6 +16,52 @@ API) using the reference implementation helps to reduce the work needed to
 support CHRE, while also ensuring more consistent behavior for scenarios that
 can be difficult to enforce via testing.
 
+## Attention
+This repository is chre-wasm, which is experimental project.
+
+
+It compiles nanoapp into wasm, embeds WAMR into CHRE, and adds wrappers for wasm nanoapp and CHRE to support .
+Then chre-wasm can run wasm nanoapps.
+
+## Start for CHRE-Wasm
+Firstly, build the chre-wasm in linux-x86.
+```shell
+cd chre-wasm
+ANDROID_BUILD_TOP=[Android_top_level_folder] ./run_sim.sh
+```
+Then, chose the world you want to test.
+
+```
+# test wasm nanoapps
+TARGET=hello_world ./singleTest.sh
+TARGET=gnss_world ./singleTest.sh
+
+# test native nanoapps
+WASM=false TARGET=hello_world ./singleTest.sh
+```
+
+There are wasm files available in the code repository for use:
+
+[ble_world](./apps/ble_world/ble_world.wasm)
+
+[gnss_world](./apps/gnss_world/gnss_world.wasm)
+
+[hello_world](./apps/hello_world/hello_world.wasm)
+
+[host_awake_world](./apps/host_awake_world/host_awake_world.wasm)
+
+[message_world](./apps/message_world/message_world.wasm)
+
+[sensor_world](./apps/sensor_world/sensor_world.wasm)
+
+[timer_world](./apps/timer_world/timer_world.wasm)
+
+[wifi_world](./apps/wifi_world/wifi_world.wasm)
+
+[wwan_world](./apps/wwan_world/wwan_world.wasm)
+
+You can try compiling nanoapps into wasm. Refer to this please: [makefile](./build/nanoapp/wasm_app.mk)
+
 ## Navigating the docs
 
 Use the navigation bar at the top and/or the links below to move through the
