@@ -61,8 +61,9 @@ NativeSymbol native_symbols[] = {
     REG_NATIVE_FUNC(chreAbort,"(i)"),
     REG_NATIVE_FUNC(chreHeapAlloc,"(i)i"),
     REG_NATIVE_FUNC(chreHeapFree,"(i)"),
-    // REG_NATIVE_FUNC(chreDebugDumpLog,"$*"),
-    { "chreLogWrapper", (void*) (chreLogWrapper), "(**)", NULL },
+    REG_NATIVE_FUNC(chreLog,"(i$*)"),
+    REG_NATIVE_FUNC(chreDebugDumpLog,"($*)"),
+    //{ "chreLogWrapper", (void*) (chreLogWrapper), "(**)", NULL },
     //! re.h end
    
    //! sensor.h begin

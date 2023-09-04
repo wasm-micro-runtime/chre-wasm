@@ -17,7 +17,7 @@ uint64_t chreGetAppIdWrapper(wasm_exec_env_t exec_env);
 
 uint32_t chreGetInstanceIdWrapper(wasm_exec_env_t exec_env);
 
-void chreLogWrapper(wasm_exec_env_t exec_env, enum chreLogLevel level, const char *formatStr, const char* data);
+void chreLogWrapper(wasm_exec_env_t exec_env, enum chreLogLevel level, const char *formatStr, _va_list va_args);
 
 uint64_t chreGetTimeWrapper(wasm_exec_env_t exec_env);
 
@@ -33,7 +33,7 @@ uint32_t chreHeapAllocWrapper(wasm_exec_env_t exec_env, uint32_t bytes);
 
 void chreHeapFreeWrapper(wasm_exec_env_t exec_env, uint32_t ptr);
 
-void chreDebugDumpLogWrapper(wasm_exec_env_t exec_env, const char *formatStr, const char* data);
+void chreDebugDumpLogWrapper(wasm_exec_env_t exec_env, const char *formatStr, _va_list va_args);
 
 #ifdef __cplusplus
 }

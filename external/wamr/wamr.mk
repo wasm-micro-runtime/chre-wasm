@@ -2,8 +2,9 @@
 # SPDX-License-Identifier:  Apache-2.0 WITH LLVM-exception
 CONFIG_ARCH_X86 := y
 CONFIG_INTERPRETERS_WAMR_CLASSIC := y
-CONFIG_INTERPRETERS_WAMR_LIBC_BUILTIN := y
-CONFIG_INTERPRETERS_WAMR_LIBC_WASI := y
+CONFIG_INTERPRETERS_WAMR_MINILOADER := y
+CONFIG_INTERPRETERS_WAMR_LIBC_BUILTIN := n
+CONFIG_INTERPRETERS_WAMR_LIBC_WASI := n
 
 CORE_ROOT := $(CHRE_PREFIX)/wamr/core
 IWASM_ROOT := $(CHRE_PREFIX)/wamr/core/iwasm
@@ -343,12 +344,9 @@ CSRCS += platform_init.c \
          posix_thread.c \
          posix_time.c \
          posix_malloc.c \
-         posix_memmap.c \
          mem_alloc.c \
-         posix_socket.c \
          ems_kfc.c \
          ems_alloc.c \
-         ems_hmu.c \
          bh_assert.c \
          bh_common.c \
          bh_hashmap.c \

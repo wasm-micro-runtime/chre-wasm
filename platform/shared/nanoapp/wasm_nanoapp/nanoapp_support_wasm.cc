@@ -121,11 +121,11 @@ const chreNslNanoappInfo* getNanoappInfo(){
  * @note It is implemented in native, and thwe wasm nanoapp will use
  * "wasm call native" to call this function.
 */
-void chreLogWrapper(enum chreLogLevel, const char*, const char*);
+//void chreLogWrapper(enum chreLogLevel, const char*, const char*);
 /**
  * @todo do we need a flex size buffer?
 */
-void chreLog(enum chreLogLevel level, const char *formatStr, ...) {
+/*void chreLog(enum chreLogLevel level, const char *formatStr, ...) {
     // This is for linux
     char strBuffer[512];
     va_list args;
@@ -133,20 +133,20 @@ void chreLog(enum chreLogLevel level, const char *formatStr, ...) {
     vsnprintf(strBuffer, 512, formatStr, args);
     va_end(args);
     chreLogWrapper(level, "%s", strBuffer);
-}
+}*/
 
-void chreDebugDumpLogWrapper(const char*, const char*);
+//void chreDebugDumpLogWrapper(const char*, const char*);
 /**
  * @todo we may use macros CHRE_MESSAGE_TO_HOST_MAX_SIZE
 */
-void chreDebugDumpLog(const char *formatStr, ...) {
+/*void chreDebugDumpLog(const char *formatStr, ...) {
     char strBuffer[512];
     va_list args;
     va_start(args, formatStr);
     vsnprintf(strBuffer, 512, formatStr, args);
     va_end(args);
     chreDebugDumpLogWrapper("%s", strBuffer);
-}
+}*/
 
 
 #ifdef __cplusplus
